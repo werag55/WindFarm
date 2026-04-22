@@ -1,0 +1,183 @@
+wind_farm_name,LAT,LON,area,country,commissioning_year,installed_capacity_MW,turbine_model,foundation_type,water_depth_m,distance_from_shore_km,total_project_budget,turbine_costs,foundation_costs,array_cable_costs,export_cable_costs,offshore_substation_costs,offshore_installation_costs,OPEX_per_MWh,inflation_rate,capacity_factor,WACC,discount_rate,project_lifetime_years
+Hornsea 1,53.883,1.922,,UK,2020,1218,Siemens Gamesa SWT-7.0-154,Monopile,20-40,120,GBP 4.2 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Hornsea 2,53.885,1.791,,UK,2022,1386,Siemens Gamesa SG 8.0-167 DD,Monopile,30-40,89,USD 3.64 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Hornsea 3,53.067,0.463,,UK,2027,2900,Siemens Gamesa SG 14-236 DD,Monopile,22-73,120,USD 9.6 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Dogger Bank A,54.783,1.861,,UK,2025,1200,GE Haliade-X 13 MW,Monopile,20-35,131,GBP 3 billion,null,null,null,null,null,null,GBP 16.31/MWh,null,0.55,null,null,25
+Dogger Bank B,54.984,1.654,,UK,2026,1200,GE Haliade-X 13 MW,Monopile,20-35,131,GBP 3 billion,null,null,null,null,null,null,null,null,0.55,null,null,25
+Dogger Bank C,54.851,2.522,,UK,2027,1200,GE Haliade-X 14 MW,Monopile,20-35,196,GBP 3 billion,null,null,null,null,null,null,null,null,0.55,null,null,25
+East Anglia ONE,52.234,2.488,,UK,2020,714,Siemens Gamesa SWT-7.0-154,Jacket,30-55,43,GBP 2.5 billion,null,null,null,null,null,null,null,null,null,null,null,25
+East Anglia TWO,52.244,2.186,,UK,2030,960,Siemens Gamesa SG 14-236 DD,null,30-40,37.5,GBP 3 billion,null,null,null,null,null,null,null,null,null,null,null,25
+East Anglia THREE,52.771,3.037,,UK,2026,1372,Siemens Gamesa SG 14-236 DD,Monopile,30-40,69,GBP 4 billion,null,null,null,null,null,null,null,null,null,null,null,25
+East Anglia ONE North,52.221,2.150,,UK,null,800,Siemens Gamesa SG 14-236 DD,null,30-40,null,null,null,null,null,null,null,null,null,null,null,null,null,25
+Walney 1 and 2,54.048,-3.618,,UK,2012,367,Siemens SWT-3.6-107 / SWT-3.6-120,Monopile,19-23,14,GBP 1 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Walney Extension,54.088,-3.439,,UK,2018,659,MHI Vestas V164-8.0 / Siemens Gamesa SWT-7.0-154,Monopile,19-23,19,GBP 2 billion,null,null,null,null,null,null,null,null,null,null,null,25
+London Array,51.644,1.553,,UK,2013,630,Siemens SWT-3.6-120,Monopile,25,20,EUR 2.2 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Thanet,51.433,1.417,,UK,2010,300,Vestas V90-3.0 MW,Monopile,20-25,11,GBP 780-900 million,null,null,null,null,null,null,null,null,null,null,null,25
+Beatrice,58.105,-3.093,,UK,2019,588,Siemens Gamesa SWT-7.0-154,Jacket,35-56,13,GBP 2.5 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Moray East,58.100,-2.800,,UK,2022,950,Vestas V164-9.5 MW,Tripod jacket,50,22,GBP 2.6 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Moray West,58.100,-3.100,,UK,2025,882,Siemens Gamesa SG 14-222 DD,Monopile,35-54,22-maj,GBP 2.5 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Seagreen,56.370,-2.160,,UK,2023,1075,Vestas V164-10.0 MW,Tripod jacket with suction bucket,42-58,27,GBP 3 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Triton Knoll,53.510,0.820,,UK,2022,857,MHI Vestas V164-9.5 MW,Monopile,18-24,33,GBP 2 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Race Bank,53.275,0.841,,UK,2018,573,Siemens SWT-6.0-154,Monopile,cze-26,27,null,null,null,null,null,null,null,null,null,null,null,null,25
+Dudgeon,53.250,1.383,,UK,2017,402,Siemens SWT-6.0-154,Monopile,18-25,32,GBP 1.5 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Sheringham Shoal,53.130,1.150,,UK,2012,317,Siemens SWT-3.6-107,Monopile,16-22,17-23,GBP 1 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Greater Gabbard,51.933,1.883,,UK,2012,504,Siemens SWT-3.6-107,Monopile,24-34,23,GBP 1.5 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Robin Rigg,54.750,-3.710,,UK,2010,174,Vestas V90-3.0 MW,Monopile,maj-18,9-lis,EUR 500 million,null,null,null,null,null,null,null,null,null,null,null,25
+Barrow,53.983,-3.283,,UK,2006,90,Vestas V90-3.0 MW,Monopile,20,7,GBP 100 million,null,null,null,null,null,null,null,null,null,null,null,25
+Burbo Bank,53.483,-3.183,,UK,2007,90,Siemens SWT-3.6-107,Monopile,cze-13,6-lip,null,null,null,null,null,null,null,null,null,null,null,null,25
+Burbo Bank Extension,53.483,-3.183,,UK,2017,258,Vestas V164-8.0 MW,Monopile,null,null,null,null,null,null,null,null,null,null,null,null,null,null,25
+West of Duddon Sands,54.010,-3.520,,UK,2014,389,Siemens SWT-3.6-120,Monopile,17-24,null,GBP 1.6 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Ormonde,54.100,-3.400,,UK,2012,150,REpower 5M,Jacket,21,10,EUR 552 million,null,null,null,null,null,null,null,null,null,null,null,25
+Lincs,53.183,0.483,,UK,2013,270,Siemens SWT-3.6-120,Monopile,sie-18,8,GBP 1 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Lynn and Inner Dowsing,53.127,0.436,,UK,2009,194,Siemens SWT-3.6-107,Monopile,3/6/2016,5-lut,EUR 349 million,null,null,null,null,null,null,null,null,null,null,null,25
+Kentish Flats,51.460,1.090,,UK,2005,90,Vestas V90-3.0 MW,Monopile,5-sie,9/8/2010,GBP 105 million,null,null,null,null,null,null,null,null,null,null,null,25
+Kentish Flats Extension,51.460,1.090,,UK,2015,49.5,Vestas V112-3.3 MW,Monopile,5-sie,10,null,null,null,null,null,null,null,null,null,null,null,null,25
+Scroby Sands,52.650,1.780,,UK,2004,60,Vestas V80-2.0 MW,Monopile,13-20,2-maj,GBP 75.5 million,null,null,null,null,null,null,null,null,null,null,null,25
+North Hoyle,53.433,-3.400,,UK,2003,60,Vestas V80-2.0 MW,Monopile,12,7-maj,null,null,null,null,null,null,null,null,null,null,null,null,25
+Rampion,50.666,-0.266,,UK,2018,400,Vestas V112-3.45 MW,Monopile,19-40,13-25,GBP 1.3 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Humber Gateway,53.64278987612652,0.29680230015394105,35,UK,2015,219,Vestas V112-3.0 MW,Monopile,15,8,GBP 700 million,null,null,null,null,null,null,null,null,null,null,null,25
+Westermost Rough,53.78104801813828,0.2148424662161718,35,UK,2015,210,Siemens SWT-6.0-154,Monopile,null,8,GBP 800 million,null,null,null,null,null,null,null,null,null,null,null,25
+Gunfleet Sands,51.739444,1.174444,17.05,UK,2010,172,Siemens SWT-3.6-107 / Siemens 6 MW,Monopile,lut-15,7,null,null,null,null,null,null,null,null,null,null,null,null,25
+Teesside,54.60234189553078, -1.4295520401172217,,UK,2014,62,Siemens SWT-2.3-93,Monopile,null,1-maj,null,null,null,null,null,null,null,null,null,null,null,null,25
+Blyth Offshore (Original),55.135833,-1.490278,,UK,2000,4,Vestas V66-2.0 MW,Monopile,10,2,null,null,null,null,null,null,null,null,null,null,null,null,19
+Blyth Offshore Demonstrator,55.1670,-1.3644,,UK,2018,41.5,MHI Vestas V164-8.3 MW,Gravity base,40,5,null,null,null,null,null,null,null,null,null,null,null,null,25
+Aberdeen Bay (EOWDC),57.22257515746838,-1.9728780880585897,19,UK,2018,93.2,MHI Vestas V164-8.8 MW,Suction Bucket Jacket,19-32,3,null,null,null,null,null,null,null,null,null,null,null,null,25
+Neart na Gaoithe,56.275, -2.245,105,UK,2025,450,Siemens Gamesa SG 8.0-167 DD,Jacket,40-60,15-maj,GBP 1.8 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Inch Cape,56.5, -2.17,150,UK,2027,1080,Vestas V236-15.0 MW,Monopile / Jacket,34-64,15,GBP 3.5 billion,null,null,null,null,null,null,null,null,0.6,null,null,25
+Galloper,51.86653342228734,1.9269606847383243,147,UK,2018,353,Siemens SWT-6.0-154,Monopile,27-36,27,GBP 1.5 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Sofia,54.9794,2.2301,593,UK,2027,1400,Siemens Gamesa SG 14-222 DD,Monopile,21-36,195,EUR 3 billion,null,null,null,null,null,null,null,null,null,null,null,25
+Hywind Scotland,57.49809316673302, -1.6930264003753728,15,UK,2017,30,Siemens SWT-6.0-154,Floating spar buoy,95-120,29,GBP 264 million,null,null,null,null,null,null,null,null,0.571,null,null,25
+Kincardine,57.0046,-1.8596,110,UK,2021,50,MHI Vestas V164-9.525 MW / Vestas V80-2.0 MW,Floating semi-submersible,60-80,15,GBP 350 million,null,null,null,null,null,null,null,null,null,null,null,25
+alpha ventus,54.0112,6.6078,4,Germany,2010,60,Senvion 5M / Adwen AD 5-116,Jacket / Tripod,30,45-60,EUR 250 million,null,null,null,null,null,null,null,null,0.42-0.55,null,null,15
+EnBW Baltic 1,54.6139,12.6667,7,Germany,2011,48.3,Siemens SWT-2.3-93,Monopile,16-19,16,EUR 150 million,null,null,null,null,null,null,null,null,null,null,null,null
+BARD Offshore 1,54.3583,5.975,59,Germany,2013,400,BARD 5.0,Tripile,40,100,EUR 2.9 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Meerwind Sued Ost,54.38,7.68,43,Germany,2014,288,Siemens SWT-3.6-120,Monopile,22-26,23,EUR 1.2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Nordsee Ost,54.43,7.68,36,Germany,2015,295,Senvion 6.2M126,Jacket,25,60,EUR 1.2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+DanTysk,55.14,7.2,70,Germany,2015,288,Siemens SWT-3.6-120,Monopile,21-32,70,EUR 1 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Butendiek,55.0136,7.7687,33,Germany,2015,288,Siemens SWT-3.6-120,Monopile,17-22,32,EUR 1.3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Amrumbank West,54.5227,7.7048,32,Germany,2015,302,Siemens SWT-3.6-120,Monopile,20-25,35,EUR 1 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Borkum Riffgrund 1,53.966944,6.553889,36,Germany,2015,312,Siemens SWT-4.0-120,Monopile,23-29,37,EUR 1.25 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Trianel Windpark Borkum I,54.0417,6.4667,56,Germany,2015,200,AREVA M5000,Tripod,25-35,45,EUR 900 million,null,null,null,null,null,null,null,null,null,null,null,null
+EnBW Baltic 2,54.9733,13.1778,27,Germany,2015,288,Siemens SWT-3.6-120,Monopile / Jacket,23-44,32,EUR 1.25 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Global Tech I,54.5,6.3583,41,Germany,2015,400,AREVA M5000,Tripod,38-41,115,EUR 1.6 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Gode Wind 1,54.05,7.03,42,Germany,2017,332,Siemens SWT-6.0-154,Monopile,26-35,33,EUR 2.2 billion (combined 1+2),null,null,null,null,null,null,null,null,null,null,null,null
+Gode Wind 2,54.05,7.03,42,Germany,2017,252,Siemens SWT-6.0-154,Monopile,26-35,33,EUR 2.2 billion (combined 1+2),null,null,null,null,null,null,null,null,null,null,null,null
+Nordergruende,53.835,8.168,6,Germany,2017,110.7,Senvion 6.2M126,Monopile,10,15,EUR 410 million,null,null,null,null,null,null,null,null,null,null,null,null
+Sandbank,55.18,6.85,60,Germany,2017,288,Siemens SWT-4.0-130,Monopile,24-33,90,EUR 1.2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Nordsee One,53.979,6.814,41.3,Germany,2017,332,Senvion 6.2M126,Monopile,26-29,45,EUR 1.2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Wikinger,54.8340,14.0680,50,Germany,2018,350,Adwen AD 5-135,Jacket,null,35,EUR 1.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Arkona,54.782,14.121,39,Germany,2019,385,Siemens Gamesa SWT-6.0-154,Monopile,null,35,EUR 1.2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Borkum Riffgrund 2,54.966667,6.495556,36,Germany,2019,450,MHI Vestas V164-8.0,Suction Bucket Jacket / Monopile,27-33,54,EUR 2.3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Merkur,54.033333,6.55,47,Germany,2019,396,GE Haliade 150-6MW,Monopile,27-33,45,EUR 1.6 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Deutsche Bucht,54.305,5.799,22.6,Germany,2020,269,MHI Vestas V164-8.4 MW,Monopile,40,100,EUR 1.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Trianel Windpark Borkum II,54.0417,6.4667,56,Germany,2020,200,Senvion 6.2M152,Monopile,27-33,45,EUR 800 million,null,null,null,null,null,null,null,null,null,null,null,null
+Kaskasi,54.485,7.45,17,Germany,2022,342,Siemens Gamesa SG 8.0-167 DD,Monopile,null,35,EUR 800 million,null,null,null,null,null,null,null,null,null,null,null,null
+Arcadis Ost 1,54.815,13.65,29,Germany,2023,257,Vestas V174-9.5 MW,Monopile,41-46,19,null,null,null,null,null,null,null,null,null,null,null,null,null
+Baltic Eagle,54.832,13.84,40,Germany,2024,476,Vestas V174-9.5 MW,Monopile,41-45,30,EUR 1.6 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Gode Wind 3,53.865,7.151,18,Germany,2025,253,Siemens Gamesa SG 11.0-200 DD,Monopile,null,32,EUR 946 million,null,null,null,null,null,null,null,null,null,null,null,null
+Borkum Riffgrund 3,54.015,6.435,75,Germany,2026,913,Siemens Gamesa SG 11.0-200 DD,Monopile,28-34,110,EUR 2.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+EnBW He Dreiht,54.212,6.255,63,Germany,2026,960,Vestas V236-15.0 MW,Monopile,38,85-95,EUR 2.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Windanker,54.85,13.91,18,Germany,2026,315,Siemens Gamesa SG 14-236 DD,Monopile,41-46,38,EUR 1 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Nordseecluster A,54.12,6.85,40,Germany,2027,660,Vestas V236-15.0 MW,Monopile,null,50,null,null,null,null,null,null,null,null,null,null,null,null,null
+Nordseecluster B,54.15,6.95,60,Germany,2029,900,Vestas V236-15.0 MW,Monopile,null,50,null,null,null,null,null,null,null,null,null,null,null,null,null
+Nordlicht 1,54.21,6.12,115,Germany,2028,980,Vestas V236-15.0 MW,Monopile,37-39,96,EUR 5 billion (combined 1+2),null,null,null,null,null,null,null,null,null,null,null,null
+Nordlicht 2,54.18,6.18,50,Germany,2028,630,Vestas V236-15.0 MW,Monopile,null,null,EUR 5 billion (combined 1+2),null,null,null,null,null,null,null,null,null,null,null,null
+Gennaker,54.609,12.609,45,Germany,2028,976.5,Siemens Gamesa SG 14-236 DD,Monopile,null,15,null,null,null,null,null,null,null,null,null,null,null,null,null
+Vindeby,54.962,11.13,0.4,Denmark,1991,kwi-95,Bonus B35/450,Gravity-based,2-kwi,5/1/2003,EUR 10 million,null,null,null,null,null,null,null,null,null,null,null,25
+Tunoe Knob,55.967,10.354,0.8,Denmark,1995,5,Vestas V39,Gravity-based,3-cze,6,null,null,null,null,null,null,null,null,null,null,null,null,null
+Middelgrunden,55.69,12.666,1,Denmark,2000,40,Bonus 2MW,Gravity-based,3-cze,2,EUR 48 million,null,null,null,null,null,null,null,null,0.2527,null,null,25
+Horns Rev 1,55.475,7.842,20,Denmark,2002,160,Vestas V80-2.0MW,Monopile,cze-14,14-20,DKK 2 billion,null,null,null,null,null,null,null,null,0.37,null,null,null
+Ronland,56.657,8.218,0.5,Denmark,2003,17-lut,Vestas V80-2.0MW / Bonus 2.3MW,null,null,0.1,null,null,null,null,null,null,null,null,null,0.443,null,null,null
+Nysted (Rodsand I),54.55,11.715,26,Denmark,2003,165.6,Siemens SWT-2.3-82,Gravity-based,6-gru,10,DKK 1600 million,null,null,null,null,null,null,null,null,0.39,null,null,null
+Samso,55.72,10.63,5,Denmark,2003,23,Bonus 2.3MW,Monopile,12,3-maj,null,null,null,null,null,null,null,null,null,null,null,null,25
+Sprogo,55.341,10.952,1.2,Denmark,2009,21,Vestas V90-3.0MW,Gravity-based,cze-16,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Horns Rev 2,55.6,7.585,33,Denmark,2009,209,Siemens SWT-2.3-93,Monopile,10,32,USD 1 billion,null,null,null,null,null,null,null,null,0.5,null,null,null
+Avedore Holme,55.602,12.482,0.1,Denmark,2009,10-sie,Siemens SWT-3.6-120,null,null,0,null,null,null,null,null,null,null,null,null,null,null,null,null
+Rodsand II,54.558,11.545,34,Denmark,2010,207,Siemens SWT-2.3-93,Gravity-based,maj-13,8-sie,EUR 450 million,null,null,null,null,null,null,null,null,null,null,null,null
+Anholt,56.598,11.205,88,Denmark,2013,400,Siemens SWP-3.6-120,Monopile,15-19,15,DKK 10 billion,null,null,null,null,null,null,null,null,0.466,null,null,null
+Horns Rev 3,55.705,7.68,44,Denmark,2019,407,MHI Vestas V164-8.3MW,Monopile,lis-19,25-30,GBP 1 billion,null,null,null,null,null,null,null,null,0.34,null,null,null
+Kriegers Flak,55.02,12.82,132,Denmark,2021,605,Siemens Gamesa SG 8.4-167 DD,Monopile,15-25,15-40,EUR 1.3 billion,null,null,null,null,null,null,null,null,0.46,null,null,null
+Vesterhav Nord,56.618,8.046,15,Denmark,2024,176,Siemens Gamesa SG 8.0-167 DD,Monopile,20,5/5/2010,EUR 769 million (combined N+S),null,null,null,null,null,null,null,null,0.52,null,null,null
+Vesterhav Syd,56.078,8.012,14,Denmark,2024,168,Siemens Gamesa SG 8.0-167 DD,Monopile,20,5/5/2010,EUR 769 million (combined N+S),null,null,null,null,null,null,null,null,0.52,null,null,null
+Thor,56.33,7.68,285,Denmark,2027,1080,Siemens Gamesa SG 14-236 DD,Monopile,27,22,DKK 15.5 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Aflandshage,55.45,12.43,42,Denmark,2026,286,Siemens Gamesa 11MW,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Hesselo,56.31,11.75,247,Denmark,2029,1000-1200,null,null,null,30,null,null,null,null,null,null,null,null,null,null,null,null,null
+Bornholm Energy Island,54.7,14.65,250,Denmark,2030,3000,null,null,null,15,EUR 9 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Bockstigen,57.036,18.15,0.5,Sweden,1998,lut-75,Wind World 550kW,Monopile,6,4,null,null,null,null,null,null,null,null,null,null,null,null,null
+Utgrunden I,56.37,16.27,1,Sweden,2000,10-maj,Enron Wind 1.5MW,Monopile,07.paďż˝,8,null,null,null,null,null,null,null,null,null,null,null,null,null
+Lillgrund,55.51,12.78,10,Sweden,2007,110,Siemens SWT-2.3-93,Gravity-based,4-sie,7,SEK 1.8 billion,null,null,null,null,null,null,null,null,0.34,null,null,null
+Karehamn,56.96,16.98,7,Sweden,2013,48,Vestas V112-3.0MW,Gravity-based,20-maj,7,EUR 120 million,null,null,null,null,null,null,null,null,0.47,null,null,null
+Hywind Scotland,57.48,-1.35,4,Norway,2017,30,Siemens SWT-6.0-154,Floating spar buoy,95-120,29,GBP 264 million,null,null,null,null,null,null,null,null,0.54,null,null,null
+Hywind Tampen,"61,329972","2,7",,Norway,2023,88,Siemens Gamesa SG 8.0-167 DD,Floating concrete spar buoy,260-300,140,NOK 7.4 billion,null,null,null,null,null,null,null,null,0.584,null,null,null
+Utsira Nord,"59,2","4,5",,Norway,null,1500,null,Floating,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Sorlige Nordsjo II,"56,817","5,25",,Norway,null,3000,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Tahkoluoto,"61,36","21,26",,Finland,2017,42,Siemens SWT-4.0-130,Gravity-based,sie-15,14,null,null,null,null,null,null,null,null,null,0.43,null,null,null
+Korsnas,"62,93","21,18",,Finland,2034,2500,null,null,null,null,EUR 2-3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Egmond aan Zee (OWEZ),"52,5894","4,41",,Netherlands,2007,108,Vestas V90-3.0MW,Monopile,gru-20,paďż˝.18,EUR 200 million,null,null,null,null,null,null,null,null,null,null,null,20
+Prinses Amalia,"52,5894",4.2064,,Netherlands,2008,120,Vestas V80-2.0MW,Monopile,19-24,23,EUR 383 million,null,null,null,null,null,null,null,null,null,null,null,20
+Luchterduinen,"52,4167","4,17",,Netherlands,2015,129,Vestas V112-3.0MW,Monopile,18-24,23,EUR 450 million,null,null,null,null,null,null,null,null,null,null,null,null
+Gemini,"54,0333","6,02",,Netherlands,2017,600,Siemens SWT-4.0-130,Monopile,28-36,85,EUR 2.8 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Borssele I and II,"51,745","3,06",,Netherlands,2020,752,Siemens Gamesa SG 8.0-167 DD,Monopile,14-40,23,null,null,null,null,null,null,null,null,null,null,null,null,null
+Borssele III and IV,"51,705","2,98",,Netherlands,2021,731.5,MHI Vestas V164-9.5MW,Monopile,16-38,22,EUR 1.3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Borssele V,"51,71","3,00",,Netherlands,2021,19,MHI Vestas V164-9.5MW,Monopile,null,20,null,null,null,null,null,null,null,null,null,null,null,null,null
+Hollandse Kust Zuid I-IV,"52,3667","4,07",,Netherlands,2023,1529,Siemens Gamesa SG 11.0-200 DD,Monopile,17-28,18-36,null,null,null,null,null,null,null,null,null,null,null,null,null
+Hollandse Kust Noord,"52,65389","4,25",,Netherlands,2023,759,Siemens Gamesa SG 11.0-200 DD,Monopile,18-24,18-maj,EUR 1.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Hollandse Kust West VI,"52,683333","3,77",,Netherlands,2026,760,Vestas V236-15.0MW,Monopile,null,53,null,null,null,null,null,null,null,null,null,null,null,null,null
+Hollandse Kust West VII,"52,617","3,77",,Netherlands,2028,795,Vestas V236-15.0MW,Monopile,null,53,null,null,null,null,null,null,null,null,null,null,null,null,null
+IJmuiden Ver Alpha,"52,8","3,50",,Netherlands,2029,2000,null,null,null,62,null,null,null,null,null,null,null,null,null,null,null,null,null
+IJmuiden Ver Beta,"52,9","3,80",,Netherlands,2029,2000,null,null,null,62,null,null,null,null,null,null,null,null,null,null,null,null,null
+IJmuiden Ver Gamma-A,"53,883","3,50",,Netherlands,null,1000,null,null,null,62,null,null,null,null,null,null,null,null,null,null,null,null,null
+IJmuiden Ver Gamma-B,"53,125","3,44",,Netherlands,null,1000,null,null,null,62,null,null,null,null,null,null,null,null,null,null,null,null,null
+Nederwiek I-A,"53,085","3,44",,Netherlands,null,1000,null,null,null,95,null,null,null,null,null,null,null,null,null,null,null,null,null
+Nederwiek I-B,"52,955","3,78",,Netherlands,null,1000,null,null,null,100-120,null,null,null,null,null,null,null,null,null,null,null,null,null
+Ten noorden van de Waddeneilanden I,"53,883","4,46",,Netherlands,2033,700,null,null,null,56,null,null,null,null,null,null,null,null,null,null,null,null,null
+Doordewind I,"54,2472","4,11",,Netherlands,2032,2000,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Doordewind II,"54,2472","4,11",,Netherlands,null,2000,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+C-Power,"51,55167","2,97",,Belgium,2013,325,Senvion 5M / Senvion 6.15M,Gravity-based / Jacket,gru-27,30,EUR 1.3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Belwind,"51,67","2,80",,Belgium,2010,171,Vestas V90-3.0MW / Alstom Haliade 150-6MW,Monopile,25-30,46,EUR 614 million,null,null,null,null,null,null,null,null,null,null,null,null
+Northwind,"51,619","2,90",,Belgium,2014,216,Vestas V112-3.0MW,Monopile,16-29,37,EUR 883 million,null,null,null,null,null,null,null,null,null,null,null,null
+Nobelwind,"51,66333333","2,83",,Belgium,2017,165,MHI Vestas V112-3.3MW,Monopile,26-38,47,EUR 655 million,null,null,null,null,null,null,null,null,null,null,null,null
+Rentel,"51,59111","2,94",,Belgium,2018,309,Siemens SWT-7.0-154,Monopile,22-36,34,EUR 1.1 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Norther,"51,528056","3,02",,Belgium,2019,370,MHI Vestas V164-8.4MW,Monopile,33,23,EUR 1.2 billion,null,null,null,null,null,null,null,null,0.431,null,null,null
+Northwester 2,"51,6875","2,76",,Belgium,2020,219,MHI Vestas V164-9.5MW,Monopile,40,52,EUR 700 million,null,null,null,null,null,null,null,null,null,null,null,25
+SeaMade,"51,721","2,79",,Belgium,2020,487,Siemens Gamesa SG 8.0-167 DD,Monopile,38-40,40-54,EUR 1.3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Princess Elisabeth Zone Lot 1,"51,62","2,49",,Belgium,2029,700,null,null,null,45,null,null,null,null,null,null,null,null,null,null,null,null,null
+Princess Elisabeth Zone Lot 2,"51,46","2,47",,Belgium,null,1225-1400,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Princess Elisabeth Zone Lot 3,"51,43","2,40",,Belgium,null,1225-1400,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Saint-Nazaire,"47,13","-2,78",,France,2022,480,GE Haliade 150-6MW,Monopile,gru-25,gru-20,EUR 2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Saint-Brieuc,"48,72","-2,76",,France,2024,496,Siemens Gamesa SG 8.0-167 DD,Jacket,30,16-mar,EUR 2.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Fecamp,"49,85","0,18",,France,2024,497,Siemens Gamesa SWT-7.0-154,Gravity-based,25-30,13-24,EUR 2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Courseulles-sur-Mer,"49,45","-0,51",,France,2027,448,Siemens Gamesa SWT-7.0-154,Monopile,22-31,16,EUR 2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Dieppe-Le Treport,"50,12","1,3",,France,2027,500,Siemens Gamesa SG 8.0 MW,Jacket,14-25,15-maj,EUR 2.7 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Yeu-Noirmoutier,"46,95","-2,47",,France,2025,496,Siemens Gamesa SG 8.0 MW,Monopile,19-36,11-lip,EUR 2-2.5 billion,null,null,null,null,null,null,null,null,null,null,null,20-25
+Dunkirk,"51,12","2,1",,France,2028,600,null,Monopile,30,10,EUR 1.4 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Provence Grand Large,"43,33","5,1",,France,2025,25,Siemens Gamesa SG 8.0 MW,Floating TLP,70-100,17,EUR 300 million,null,null,null,null,null,null,null,null,null,null,null,null
+EolMed,"42,85","3,2",,France,2025,30,Vestas V164-10.0 MW,Floating damping pool,60,15-18,EUR 212 million,null,null,null,null,null,null,null,null,null,null,null,null
+EFGL,"42,95","3,25",,France,2025,30,Vestas V164-10.0 MW,Floating semi-submersible,65-80,16,null,null,null,null,null,null,null,null,null,null,null,null,null
+Centre Manche 1,"49,6","-1,3",,France,2030,1000,null,null,null,32,null,null,null,null,null,null,null,null,null,null,null,null,null
+Centre Manche 2,"49,55","-1,25",,France,2033,1500,null,null,null,40,EUR 4.5 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Sud-Atlantique I,"45,9","-1,6",,France,2032,1000,null,null,null,40,null,null,null,null,null,null,null,null,null,null,null,null,null
+Arklow Bank Phase 1,"52,79","-5,95",,Ireland,2004,25-lut,GE 3.6 MW,Monopile,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null
+Arklow Bank Phase 2,"52,8","-5,9",,Ireland,2029,800,null,Monopile,null,10,EUR 2.5 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Codling Wind Park,"53,1","-5,7",,Ireland,2030,1300,null,null,null,13-22,null,null,null,null,null,null,null,null,null,null,null,null,25
+Dublin Array,"53,2","-5,72",,Ireland,2030,824,null,null,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null
+Oriel,54,"-5,9",,Ireland,2028,375,null,null,20,6,null,null,null,null,null,null,null,null,null,null,null,null,null
+North Celtic Sea,"51,7","-7,5",,Ireland,2030,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Celtic Sea Array,"51,6","-7,6",,Ireland,2030,1200,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null
+Baltic Power,"55,1","17,5",,Poland,2026,1140,Vestas V236-15.0 MW,Monopile,40,23,PLN 10 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Baltica 2,"55,15","17,3",,Poland,2027,1498,Siemens Gamesa SG 14-222 DD,Monopile,25-40,40,PLN 30 billion (combined 2+3),null,null,null,null,null,null,null,null,null,null,null,null
+Baltica 3,"55,2","17,4",,Poland,2029,1036,null,Monopile,null,null,PLN 30 billion (combined 2+3),null,null,null,null,null,null,null,null,null,null,null,null
+Baltica 1,"55,05","17,45",,Poland,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+MFW Baltyk II,"55,08","16,9",,Poland,2028,720,Siemens Gamesa SG 14-236 DD,Monopile,25-40,37,PLN 27 billion (combined II+III),null,null,null,null,null,null,null,null,null,null,null,null
+MFW Baltyk III,"55,12","16,85",,Poland,2028,720,Siemens Gamesa SG 14-236 DD,Monopile,25-40,22,PLN 27 billion (combined II+III),null,null,null,null,null,null,null,null,null,null,null,null
+MFW Baltyk I,"55,03","16,95",,Poland,null,1560,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+F.E.W. Baltic II,"55,25","17,1",,Poland,2026,350,Siemens Gamesa SG 14-236 DD,Monopile,30-50,55,null,null,null,null,null,null,null,null,null,null,null,null,null
+BC-Wind,"55,18","17,2",,Poland,2028,390,14 MW class,null,null,23,EUR 2 billion,null,null,null,null,null,null,null,null,null,null,null,null
+WindFloat Atlantic,"41,68",-9,,Portugal,2020,25,Vestas V164-8.4 MW,Floating semi-submersible,100,20,EUR 125 million,null,null,null,null,null,null,null,null,null,null,null,null
+DemoSATH,"43,36","-2,88",,Spain,2022,2,2 MW turbine,Floating SATH,85,3-lip,null,null,null,null,null,null,null,null,null,null,null,null,null
+Granadilla Offshore,"28,08","-16,53",,Spain,null,240,null,Floating,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Beleolico,"40,47","18,5",,Italy,2022,30,MingYang MySE3.0-135,Monopile,kwi-18,3,EUR 80 million,null,null,null,null,null,null,null,null,null,null,null,25
+7 Seas Med,"37,2","12,5",,Italy,null,250,10 MW class,Floating TetraSpar,200-350,35,EUR 741 million,null,null,null,null,null,null,null,null,null,null,null,null
+Med Wind,"37,1","12,3",,Italy,null,2800,MingYang 18.8 MW,Floating,null,80,EUR 9.3 billion,null,null,null,null,null,null,null,null,null,null,null,null
+Ichnusa Wind Power,"39,5","8,3",,Italy,2027,504,12 MW class,Floating semi-submersible,null,40,null,null,null,null,null,null,null,null,null,null,null,null,null
+Alexandroupolis,"40,85","25,9",,Greece,2030,400,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
