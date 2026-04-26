@@ -41,15 +41,8 @@ COUNTRY_TO_FOUNDATION_SCOPE = {
     "Belgium": "TSO_provided",
 }
 
-CURRENCY_RATES_TO_EUR = {
-	"EUR": 1.0,
-	"GBP": 1.15,
-	"USD": 0.85,
-	"NOK": 0.09,
-	"DKK": 0.13,
-	"SEK": 0.09,
-	"PLN": 0.24,
-}
+SUPPORTED_CURRENCIES = {"EUR", "GBP", "USD", "NOK", "DKK", "SEK", "PLN"}
+
 BUDGET_SCALES = {
 	"million": 1e6,
 	"billion": 1e9,

@@ -45,7 +45,10 @@ def normalize_core_fields(df: pd.DataFrame) -> pd.DataFrame:
     df["distance_from_shore_km"] = df["distance_from_shore_km"].apply(to_float_range_mean)
     df["water_depth_m"] = df["water_depth_m"].apply(to_float_range_mean)
     df["project_lifetime_years"] = df["project_lifetime_years"].apply(to_float_range_mean)
-    df["total_project_budget_eur"] = df["total_project_budget"].apply(parse_budget_to_eur)
+    df["total_project_budget_eur"] = df.apply(
+        lambda row: parse_budget_to_eur(row["total_project_budget"], row["commissioning_year"]),
+        axis=1
+    )
     df["installed_capacity_MW"] = pd.to_numeric(df["installed_capacity_MW"], errors="coerce")
     df['LAT'] = pd.to_numeric(df['LAT'], errors='coerce')
     df['LON'] = pd.to_numeric(df['LON'], errors='coerce')
