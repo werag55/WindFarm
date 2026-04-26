@@ -11,10 +11,7 @@ import numpy as np
 import pandas as pd
 
 from .. import config
-from ..data_preparation.enrichment import (
-    get_mean_wave_height,
-    get_mean_wind_speed_from_gwa,
-)
+from ..data_preparation.prep_sample import prepare_sample
 from ..visualisations.model_dashboard import create_model_dashboard
 
 LOGGER = logging.getLogger(__name__)
@@ -108,48 +105,10 @@ def predict_new_location(
     lcoe_model: LinearModel, sample: Dict[str, Any] | None = None
 ) -> Dict[str, float]:
     """Predict LCOE for a new location, fetching environmental data if needed."""
-    sample_data = dict(config.DEFAULT_NEW_SAMPLE)
-    if sample:
-        sample_data.update(sample)
+    sample_data = prepare_sample(sample)
 
-    has_coords = not pd.isna(sample_data.get("LAT")) and not pd.isna(
-        sample_data.get("LON")
-    )
-    if has_coords:
-        try:
-            if pd.isna(sample_data.get("mean_wind_speed_mps")):
-                sample_data["mean_wind_speed_mps"] = get_mean_wind_speed_from_gwa(
-                    sample_data["LAT"], sample_data["LON"]
-                )
-                LOGGER.info(
-                    "Fetched wind speed from GWA for (%.4f, %.4f): %.3f m/s",
-                    sample_data["LAT"],
-                    sample_data["LON"],
-                    sample_data["mean_wind_speed_mps"],
-                )
-            if pd.isna(sample_data.get("mean_wave_height_m")):
-                sample_data["mean_wave_height_m"] = get_mean_wave_height(
-                    sample_data["LAT"], sample_data["LON"]
-                )
-                LOGGER.info(
-                    "Fetched wave height for (%.4f, %.4f): %.3f m",
-                    sample_data["LAT"],
-                    sample_data["LON"],
-                    sample_data["mean_wave_height_m"],
-                )
-        except Exception as exc:
-            LOGGER.warning(
-                "GWA fetch failed for new location (%.4f, %.4f): %s. Cannot predict LCOE.",
-                sample_data["LAT"],
-                sample_data["LON"],
-                exc,
-            )
-            return {
-                "mean_wind_speed_mps": float("nan"),
-                "mean_wave_height_m": float("nan"),
-                "predicted_lcoe_eur_per_mwh": float("nan"),
-            }
-    else:
+    has_coords = not pd.isna(sample_data.get("LAT")) and not pd.isna(sample_data.get("LON"))
+    if not has_coords:
         LOGGER.warning("No LAT/LON for new location, cannot fetch environmental data.")
         return {
             "mean_wind_speed_mps": float("nan"),
@@ -157,12 +116,25 @@ def predict_new_location(
             "predicted_lcoe_eur_per_mwh": float("nan"),
         }
 
-    predicted_lcoe = lcoe_model.predict_one(sample_data)
-    return {
-        "mean_wind_speed_mps": float(sample_data["mean_wind_speed_mps"]),
-        "mean_wave_height_m": float(sample_data["mean_wave_height_m"]),
-        "predicted_lcoe_eur_per_mwh": float(predicted_lcoe),
-    }
+    try:
+        predicted_lcoe = lcoe_model.predict_one(sample_data)
+        return {
+            "mean_wind_speed_mps": float(sample_data["mean_wind_speed_mps"]),
+            "mean_wave_height_m": float(sample_data["mean_wave_height_m"]),
+            "predicted_lcoe_eur_per_mwh": float(predicted_lcoe),
+        }
+    except Exception as exc:
+        LOGGER.warning(
+            "Prediction failed for new location (%.4f, %.4f): %s. Cannot predict LCOE.",
+            sample_data["LAT"],
+            sample_data["LON"],
+            exc,
+        )
+        return {
+            "mean_wind_speed_mps": float("nan"),
+            "mean_wave_height_m": float("nan"),
+            "predicted_lcoe_eur_per_mwh": float("nan"),
+        }
 
 
 def train_and_evaluate(frame) -> None:

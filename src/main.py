@@ -6,6 +6,9 @@ from .visualisations.profitability_map import profitability_map
 from .calculations import calculate
 from .data_preparation.prep import prepare_data
 
+#TODO: fill missing data (marked in red in ../data/european_offshore_wind_capex.xlsx)
+#TODO: add more prediction models
+#TODO: perform sensitivity analysis
 
 def main():
     """Full pipeline execution"""
@@ -15,6 +18,7 @@ def main():
     df = calculate(df)
     profitability_map(df)
     train_and_evaluate(df)
+
 
 if __name__ == "__main__":
     main()

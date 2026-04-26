@@ -38,7 +38,7 @@ def get_mean_wind_speed_from_gwa(latitude: float, longitude: float) -> float:
 
 #TODO: Implement actual wave height fetching
 def get_mean_wave_height(latitude: float, longitude: float) -> float:
-    """Fetch mean wave height from Global Wind Atlas through wind-stats."""
+    """Fetch mean wave height."""
     return 9.0
 
 def add_environmental_columns(df: pd.DataFrame) -> pd.DataFrame:

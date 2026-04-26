@@ -33,6 +33,8 @@ DEFAULT_VALUES = {
 }
 
 #TODO: prepare country -> foundation scope map based on Modele kosztów przyłączenia morskich farm wiatrowych w Europie (ostatnie ~20 lat).pdf
+# Split into multiple features? (OSS, offshore cable, onshore cable, model)
+# Determine based on the commissioning year and country if possible, otherwise default to "Unknown"
 COUNTRY_TO_FOUNDATION_SCOPE = {
     "UK": "TSO_provided",
     "Germany": "TSO_provided",
@@ -95,16 +97,15 @@ FEATURE_COLUMNS = {
     "water_depth_m",
 }
 
-#TODO: country based on LAT, LON if missing
 DEFAULT_NEW_SAMPLE = {
 	"LAT": 55.0,
 	"LON": 0.0,
 	"installed_capacity_MW": 800,
 	"distance_from_shore_km": 90,
     "project_lifetime_years": 25,
-    "foundation_scope": "TSO_provided",
-    "area_sqkm": 100.0,
+    "foundation_scope": "Unknown",
     "country": "UK",
+    "area_sqkm": 100.0,
     "commissioning_year": CURRENT_YEAR,
     "water_depth_m": 50.0,
     "mean_wind_speed_mps": None,
