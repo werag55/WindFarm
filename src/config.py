@@ -3,14 +3,14 @@
 from datetime import datetime
 
 
-RAW_DATASET_PATH = "data/data1.csv"
+RAW_DATASET_PATH = "data/european_offshore_wind_capex.csv"
 CLEANED_DATA_PATH = "data/cleaned_offshore_wind_data.csv"
 CALCULATED_DATA_PATH = "data/calculated_offshore_wind_data.csv"
 MAP_HTML_PATH = "results/offshore_wind_profitability_map.html"
 MODEL_REPORT_PATH = "results/profitability_model_report.json"
 MODEL_DASHBOARD_PATH = "results/profitability_model_dashboard.html"
 
-CSV_SEPARATOR = ","
+CSV_SEPARATOR = ";"
 MISSING_VALUE_TOKENS = {"null", "None", "", "NaN", "nan"}
 
 

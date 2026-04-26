@@ -2,9 +2,12 @@
 
 import numpy as np
 import pandas as pd
+import logging
 
 from .. import config
 from .parsing import parse_budget_to_eur, to_float_range_mean
+
+LOGGER = logging.getLogger(__name__)
 
 def load_raw_dataset(csv_path: str) -> pd.DataFrame:
     """Load raw CSV while tolerating mixed encodings."""
@@ -45,11 +48,11 @@ def normalize_core_fields(df: pd.DataFrame) -> pd.DataFrame:
     df["distance_from_shore_km"] = df["distance_from_shore_km"].apply(to_float_range_mean)
     df["water_depth_m"] = df["water_depth_m"].apply(to_float_range_mean)
     df["project_lifetime_years"] = df["project_lifetime_years"].apply(to_float_range_mean)
+    df["installed_capacity_MW"] = df["installed_capacity_MW"].apply(to_float_range_mean)
     df["total_project_budget_eur"] = df.apply(
         lambda row: parse_budget_to_eur(row["total_project_budget"], row["commissioning_year"]),
         axis=1
     )
-    df["installed_capacity_MW"] = pd.to_numeric(df["installed_capacity_MW"], errors="coerce")
     df['LAT'] = pd.to_numeric(df['LAT'], errors='coerce')
     df['LON'] = pd.to_numeric(df['LON'], errors='coerce')
     return df
@@ -57,7 +60,19 @@ def normalize_core_fields(df: pd.DataFrame) -> pd.DataFrame:
 
 def filter_incomplete_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Remove rows that are missing critical information."""
-    return df.dropna(subset=config.MANDATORY_COLUMNS)
+    initial_count = len(df)
+    cleaned = df.dropna(subset=config.MANDATORY_COLUMNS)
+
+    if len(cleaned) < initial_count:
+        dropped_rows = df[~df.index.isin(cleaned.index)]
+        for _, row in dropped_rows.iterrows():
+            missing_cols = [col for col in config.MANDATORY_COLUMNS if pd.isna(row[col])]
+            farm_name = row.get("wind_farm_name", "Unknown")
+            LOGGER.warning(
+                "Dropping row for wind farm '%s' due to missing critical columns: %s",
+                farm_name, ", ".join(missing_cols)
+            )
+    return cleaned
 
 
 def prepare_cleaned_dataset(raw_csv_path: str) -> pd.DataFrame:

@@ -49,7 +49,7 @@ def parse_budget_to_eur(text: str, commissioning_year: int) -> float:
         return np.nan
     raw = str(text)
     year = commissioning_year if pd.notna(commissioning_year) else datetime.now().year
-    
+
     currency = next((cur for cur in config.SUPPORTED_CURRENCIES if cur in raw), None)
 
     if currency is None:
