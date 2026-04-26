@@ -6,7 +6,7 @@ import re
 import numpy as np
 import pandas as pd
 
-import config
+from .. import config
 
 
 LOGGER = logging.getLogger(__name__)
