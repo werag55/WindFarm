@@ -4,11 +4,11 @@ This project analyzes the profitability of offshore wind projects in various reg
 
 ## Features
 
-*   **Data Cleaning and Preparation:** Cleans and prepares raw wind farm data, handling missing values and inconsistencies.
-*   **Data Enrichment:** Enriches the dataset with environmental data from the Global Wind Atlas.
-*   **Profitability Calculation:** Calculates key financial and operational metrics, including CAPEX, OPEX, and Levelized Cost of Energy (LCOE).
-*   **Predictive Modeling:** Trains a linear regression model to predict LCOE for new locations.
-*   **Interactive Visualizations:** Generates an interactive map to visualize wind farm profitability and a dashboard to analyze the model's performance.
+- **Data Cleaning and Preparation:** Cleans and prepares raw wind farm data, handling missing values and inconsistencies.
+- **Data Enrichment:** Enriches the dataset with environmental data from the Global Wind Atlas.
+- **Profitability Calculation:** Calculates key financial and operational metrics, including CAPEX, OPEX, and Levelized Cost of Energy (LCOE).
+- **Predictive Modeling:** Trains a linear regression model to predict LCOE for new locations.
+- **Interactive Visualizations:** Generates an interactive map to visualize wind farm profitability and a dashboard to analyze the model's performance.
 
 ## Pipeline
 
@@ -19,18 +19,13 @@ The project's main pipeline consists of the following steps:
 3.  **Profitability Map:** An interactive map is generated to visualize the LCOE of different wind farms.
 4.  **Model Training and Evaluation:** A linear regression model is trained to predict LCOE, and its performance is evaluated.
 
-## Installation
+## Installation & Usage
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/werag55/WindFarm.git
-    ```
-2.  Install the required dependencies:
-    ```bash
-    pip install -r src/requirements.txt
-    ```
+Install the required dependencies:
 
-## Usage
+```bash
+pip install -r src/requirements.txt
+```
 
 To run the full pipeline, execute the `main.py` script:
 
@@ -39,53 +34,6 @@ py -m src.main
 ```
 
 This will perform all the steps from data preparation to model training and generate the output files in the `results` directory.
-
-## Project Structure
-
-```
-├── data/
-│   ├── calculated_offshore_wind_data.csv
-│   ├── cleaned_offshore_wind_data.csv
-│   └── european_offshore_wind_capex.csv
-├── results/
-│   ├── offshore_wind_profitability_map.html
-│   ├── profitability_model_dashboard.html
-│   └── profitability_model_report.json
-├── src/
-│   ├── data_preparation/
-│   │   ├── cleanup.py
-│   │   ├── enrichment.py
-│   │   ├── indexation.py
-│   │   └── prep.py
-│   ├── model/
-│   │   └── linear_regression.py
-│   ├── utils/
-│   │   └── logging.py
-│   ├── visualisations/
-│   │   ├── model_dashboard.py
-│   │   └── profitability_map.py
-│   ├── __init__.py
-│   ├── calculations.py
-│   ├── config.py
-│   ├── main.py
-│   └── requirements.txt
-└── README.md
-```
-
-## Data
-
-The project uses the `european_offshore_wind_capex.csv` dataset, which contains information about various offshore wind projects in Europe. The data is cleaned and enriched during the pipeline, and the intermediate and final datasets are saved in the `data` directory.
-
-## Model
-
-A linear regression model is used to predict the Levelized Cost of Energy (LCOE). The model is trained on the prepared dataset and evaluated using metrics like RMSE, MAE, and R-squared. The model's details and performance are saved in the `results/profitability_model_report.json` file.
-
-## Visualizations
-
-The project generates two main visualizations:
-
-*   **Profitability Map:** An interactive map showing the LCOE of different wind farms across Europe. This is saved as `results/offshore_wind_profitability_map.html`.
-*   **Model Dashboard:** A dashboard to analyze the performance of the linear regression model. This is saved as `results/profitability_model_dashboard.html`.
 
 ## Configuration
 
@@ -100,4 +48,3 @@ The project's configuration is managed in the `src/config.py` file. This file co
 - [ ] Prepare country -> foundation scope map
 - [ ] Implement actual wave height fetching
 - [ ] Verify / Adjust inflation indexation
-
