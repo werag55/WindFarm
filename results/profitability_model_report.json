@@ -1,42 +1,42 @@
 {
   "lcoe_model": {
     "features": [
+      "mean_wind_speed_mps",
+      "water_depth_m",
       "installed_capacity_MW",
       "commissioning_year",
-      "mean_wind_speed_mps",
-      "LAT",
-      "water_depth_m",
       "distance_from_shore_km",
-      "LON",
-      "project_lifetime_years"
+      "project_lifetime_years",
+      "LAT",
+      "LON"
     ],
     "train_metrics": {
-      "rows_used": 66,
-      "rmse": 35.07484484867945,
-      "mae": 25.326913448248916,
-      "r2": 0.2732932739613718
+      "rows_used": 86,
+      "rmse": 32.59425854192668,
+      "mae": 22.225470961593217,
+      "r2": 0.38136076172077604
     },
     "test_metrics": {
-      "rows_used": 19,
-      "rmse": 58.955134484719075,
-      "mae": 37.37981595228382,
-      "r2": 0.18892834556503102
+      "rows_used": 22,
+      "rmse": 49.61348302680562,
+      "mae": 35.53543937031693,
+      "r2": 0.2584989760663261
     },
-    "intercept": -5948.5627644893,
+    "intercept": -2714.054114047703,
     "coefficients": {
-      "installed_capacity_MW": -0.07777414326950982,
-      "commissioning_year": 2.8810745929365953,
-      "mean_wind_speed_mps": 4.847929582055756,
-      "LAT": 2.164835482561775,
-      "water_depth_m": -0.024228194452443296,
-      "distance_from_shore_km": -0.03906936558754095,
-      "LON": -0.9145353734867819,
-      "project_lifetime_years": 5.4669590457778305
+      "mean_wind_speed_mps": 10.567838298118195,
+      "water_depth_m": 0.42620595959535523,
+      "installed_capacity_MW": -0.056968118548624706,
+      "commissioning_year": 1.4046997049406886,
+      "distance_from_shore_km": -0.045249251511039465,
+      "project_lifetime_years": -4.272308365092998,
+      "LAT": 0.41917169520264863,
+      "LON": -0.8369256749007457
     }
   },
   "new_location_prediction": {
     "mean_wind_speed_mps": 9.361673770124112,
     "mean_wave_height_m": 9.0,
-    "predicted_lcoe_eur_per_mwh": 122.67205645221748
+    "predicted_lcoe_eur_per_mwh": 118.71024737823336
   }
 }
