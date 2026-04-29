@@ -26,6 +26,11 @@ py -m src2.main
 
 This will launch the Streamlit application in [your web browser](http://localhost:8050/).
 
+### Important
+
+**Data Preprocessing** and **Profitability Calculation** stages run only if there are no `cleaned_european_offshore_wind_capex.csv` and `calculated_offshore_wind_data.csv` files in `/data` folder. 
+It prevents overwriting the existing data and allows to save time when you want to quickly test changes in the UI or model. If you want to re-run the preprocessing or calculations, simply delete the corresponding files from the `/data` folder.
+
 ## Configuration
 
 The project's configuration is managed in the `src2/config.py` file. This file contains constants for data paths, model parameters, and other settings.
