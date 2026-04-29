@@ -1,0 +1,10 @@
+numpy
+pandas
+wind-stats
+plotly
+requests
+forex-python
+scikit-learn
+dash
+dash-bootstrap-components
+waitress
