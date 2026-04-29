@@ -4,6 +4,7 @@ from .data_preprocessing.prep import prepare_data
 from .utils.logging import configure_logging
 from .model.model import train_model
 from .ui.app import start_ui
+from .ui.dashboard import create_dashboard
 from .calculations.calculations import build_calculated_dataset
 
 
@@ -14,7 +15,8 @@ def main():
     configure_logging()
     cleaned_data = prepare_data()
     calculated_data = build_calculated_dataset(cleaned_data)
-    model, _, _ = train_model(calculated_data)
+    model, metrics, feature_importance = train_model(calculated_data)
+    create_dashboard(metrics, feature_importance)
     start_ui(calculated_data, model)
 
 
