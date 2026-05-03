@@ -1,9 +1,7 @@
 """Indexation functions for adjusting project budgets based on age and inflation."""
 
 import pandas as pd
-import pandas as pd
 import wbgapi as wb
-from functools import lru_cache
 
 from src.data_preparation.cleanup import LOGGER
 from .. import config
@@ -61,7 +59,6 @@ def _index_budget_for_age(df: pd.DataFrame) -> pd.DataFrame:
         if age <= config.MAX_DATA_AGE_YEARS:
             return budget, "recent"
 
-        # 1. Fetch CPI series for the country
         wb_code = country_map.get(country, country)
         cpi_series = get_inflation_series(wb_code)
 
