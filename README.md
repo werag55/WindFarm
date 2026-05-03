@@ -12,7 +12,7 @@ This project analyzes the capital expenditure (CAPEX) and profitability of Europ
 
 ## Installation & Usage
 
-Install the required dependencies:
+Install Python 3.12.0 and the required dependencies:
 
 ```bash
 pip install -r src2/requirements.txt
@@ -28,7 +28,7 @@ This will launch the Streamlit application in [your web browser](http://localhos
 
 ### Important
 
-**Data Preprocessing** and **Profitability Calculation** stages run only if there are no `cleaned_european_offshore_wind_capex.csv` and `calculated_offshore_wind_data.csv` files in `/data` folder. 
+**Data Preprocessing** and **Profitability Calculation** stages run only if there are no `cleaned_european_offshore_wind_capex.csv` and `calculated_offshore_wind_data.csv` files in `/data` folder.
 It prevents overwriting the existing data and allows to save time when you want to quickly test changes in the UI or model. If you want to re-run the preprocessing or calculations, simply delete the corresponding files from the `/data` folder.
 
 ## Configuration
