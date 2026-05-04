@@ -6,7 +6,7 @@ import pandas as pd
 
 from .. import config
 from .cleanup import prepare_cleaned_dataset
-from .enrichment import add_distance_from_port, add_environmental_columns
+from .enrichment import add_distance_from_port, add_environmental_columns, add_distance_from_construction_port
 from .indexation import build_indexed_dataset
 
 def prepare_data() -> pd.DataFrame:
@@ -15,6 +15,7 @@ def prepare_data() -> pd.DataFrame:
         df = prepare_cleaned_dataset(config.RAW_DATASET_PATH)
         df = add_environmental_columns(df)
         df = add_distance_from_port(df)
+        df = add_distance_from_construction_port(df)
         df = build_indexed_dataset(df)
         df.to_csv(config.CLEANED_DATASET_PATH, index=False)
     else:

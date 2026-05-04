@@ -31,6 +31,7 @@ NUMERIC_COLUMNS = [
     "distance_from_shore_max_km",
     "distance_from_shore_mean_km",
     "distance_from_port_km",
+    "distance_from_construction_port_km",
     "total_project_budget_eur",
     "total_project_budget_eur_indexed",
     "project_lifetime_years",
@@ -126,6 +127,7 @@ FINAL_COLUMNS = [
     "distance_from_shore_max_km",
     "distance_from_shore_mean_km",
     "distance_from_port_km",
+    "distance_from_construction_port_km",
     "total_project_budget",
     "total_project_budget_eur",
     "total_project_budget_eur_indexed",
@@ -146,7 +148,8 @@ FEATURE_COLUMNS = [
     "distance_from_shore_min_km",
     "distance_from_shore_max_km",
     "distance_from_shore_mean_km",
-    # "distance_from_port_km", #TODO: should we use it?
+    "distance_from_port_km",
+    "distance_from_construction_port_km",
     "project_lifetime_years",
     "mean_wind_speed_mps",
     "mean_wave_height_m",
@@ -168,6 +171,7 @@ DEFAULT_NEW_SAMPLE = {
     "distance_from_shore_min_km": 20.0,
     "distance_from_shore_max_km": 40.0,
     "distance_from_port_km": None, # to be filled based on location
+    "distance_from_construction_port_km": None, # to be filled based on location
     "project_lifetime_years": 25,
     "installed_capacity_MW": 100.0,
     "mean_wind_speed_mps": None, # to be filled based on location

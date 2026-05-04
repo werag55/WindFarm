@@ -11,7 +11,7 @@ from waitress import serve
 
 from .. import config
 from ..calculations.calculations import calculate
-from ..data_preprocessing.enrichment import add_environmental_columns, add_distance_from_port
+from ..data_preprocessing.enrichment import add_environmental_columns, add_distance_from_port, add_distance_from_construction_port
 from .components import create_input_form
 from .profitability_map import profitability_map
 
@@ -77,6 +77,7 @@ def create_app(df: pd.DataFrame, model):
         # Enrich with environmental data
         new_sample = add_environmental_columns(new_sample)
         new_sample = add_distance_from_port(new_sample)
+        new_sample = add_distance_from_construction_port(new_sample)
 
         # One-hot encode categorical features
         for col in config.CATEGORICAL_COLUMNS:
@@ -117,8 +118,18 @@ def create_app(df: pd.DataFrame, model):
                 dbc.Col(dbc.Card([
                     dbc.CardHeader("LCOE (Indexed)"),
                     dbc.CardBody(f"{new_sample_calculated['lcoe_eur_per_mwh_indexed'].iloc[0]:,.2f} EUR/MWh")
-                ]), width=3)
-            ])
+                ]), width=3),
+            ]),
+            dbc.Row([
+                dbc.Col(dbc.Card([
+                    dbc.CardHeader("Distance from Port (shapefile)"),
+                    dbc.CardBody(f"{new_sample_calculated['distance_from_port_km'].iloc[0]:,.1f} km")
+                ]), width=3),
+                dbc.Col(dbc.Card([
+                    dbc.CardHeader("Distance from Construction Port"),
+                    dbc.CardBody(f"{new_sample_calculated['distance_from_construction_port_km'].iloc[0]:,.1f} km")
+                ]), width=3),
+            ], className="mt-2"),
         ])
 
         return profitability_map(combined_df, color_column), output_div
