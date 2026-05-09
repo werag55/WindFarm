@@ -10,3 +10,4 @@ dash-bootstrap-components
 waitress
 geopandas
 shapely
+wbgapi
