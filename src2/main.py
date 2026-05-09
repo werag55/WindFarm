@@ -15,8 +15,8 @@ def main():
     configure_logging()
     cleaned_data = prepare_data()
     calculated_data = build_calculated_dataset(cleaned_data)
-    model, metrics, feature_importance = train_model(calculated_data)
-    create_dashboard(metrics, feature_importance)
+    model, comparison_metrics, feature_importance, best_y_data = train_model(calculated_data)
+    create_dashboard(comparison_metrics, feature_importance, best_y_data)
     start_ui(calculated_data, model)
 
 
