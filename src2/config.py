@@ -96,15 +96,12 @@ OPEX_DISTANCE_CORRECTIONS = [
 	(float("inf"), 25.0),  # beyond 100 km
 ]
 
-CURRENT_YEAR = datetime.now().year
+CURRENT_YEAR = 2026
 MAX_DATA_AGE_YEARS = 5
+HOURS_PER_YEAR = 8760
 
-def hours_per_year(year):
-    """Calculate hours per year, accounting for leap years."""
-    start = datetime(year, 1, 1)
-    end = datetime(year + 1, 1, 1)
-    return (end - start).total_seconds() / 3600.0
-HOURS_PER_YEAR = hours_per_year(CURRENT_YEAR)
+# World Bank API does not have 2025/2026 data
+INDEXED_BY_YEAR = 2024
 
 FINAL_COLUMNS = [
     "wind_farm_name",
