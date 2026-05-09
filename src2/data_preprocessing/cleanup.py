@@ -19,6 +19,11 @@ def prepare_cleaned_dataset(csv_path: str) -> pd.DataFrame:
     df = _filter_incomplete_rows(df)
     df = _convert_range_columns(df)
     df = _convert_to_numeric(df)
+    
+    # Enrich connection details based on rules
+    conn_details = df.apply(lambda row: pd.Series(config.get_connection_details(row.get('country'), row.get('commissioning_year'))), axis=1)
+    df = pd.concat([df, conn_details], axis=1)
+
     df = _one_hot_encode_categoricals(df)
 
     final_columns = config.FINAL_COLUMNS.copy()

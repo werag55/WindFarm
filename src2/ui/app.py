@@ -74,6 +74,11 @@ def create_app(df: pd.DataFrame, model):
         new_sample["water_depth_mean_m"] = new_sample[["water_depth_min_m", "water_depth_max_m"]].mean(axis=1)
         new_sample["distance_from_shore_mean_km"] = new_sample[["distance_from_shore_min_km", "distance_from_shore_max_km"]].mean(axis=1)
 
+        # Enrich grid connection info
+        conn_details = config.get_connection_details(country, year)
+        for key, value in conn_details.items():
+            new_sample[key] = value
+
         # Enrich with environmental data
         new_sample = add_environmental_columns(new_sample)
         new_sample = add_distance_from_port(new_sample)
