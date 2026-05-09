@@ -8,4 +8,6 @@ scikit-learn
 dash
 dash-bootstrap-components
 waitress
+geopandas
+shapely
 wbgapi
