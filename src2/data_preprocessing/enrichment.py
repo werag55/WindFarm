@@ -1,11 +1,13 @@
 """Data enrichment functions for offshore wind project dataset."""
 
+from datetime import datetime
 from functools import lru_cache
 import logging
 import math
 
 import numpy as np
 import pandas as pd
+import requests
 import wind_stats
 
 from shapely.geometry import Point
@@ -89,7 +91,7 @@ def add_environmental_columns(df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     )
     df["mean_wave_height_m"] = df.apply(
-        lambda row: _get_mean_wave_height(row["LAT"], row["LON"]) \
+        lambda row: _get_mean_wave_height(row["LAT"], row["LON"], row.get("commissioning_year")) \
             if pd.isna(row["mean_wave_height_m"]) \
                 and not pd.isna(row["LAT"]) and not pd.isna(row["LON"]) \
             else row["mean_wave_height_m"],
@@ -120,11 +122,6 @@ def _get_mean_wind_speed_from_gwa(latitude: float, longitude: float) -> float:
     LOGGER.debug("GWA result lat=%.4f lon=%.4f mean_wind_speed=%.3f", lat, lon, wind_speed)
     return wind_speed
 
-
-#TODO: Implement actual wave height fetching
-def _get_mean_wave_height(latitude: float, longitude: float) -> float:
-    """Fetch mean wave height."""
-    return 9.0
 
 def _get_distance_from_port(lat: float, lon: float, ports_gdf) -> float:
     """Calculate distance in km from nearest port using preloaded GeoDataFrame."""
@@ -176,3 +173,73 @@ def add_distance_from_port(df: pd.DataFrame) -> pd.DataFrame:
         df["distance_from_port_km"] = np.nan
 
     return df
+
+def _get_mean_wave_height(latitude: float, longitude: float, commissioning_year: int = None) -> float:
+    """Fetch mean wave height from Open-Meteo Marine API for a specific year."""
+    lat = round(float(latitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    lon = round(float(longitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    
+    last_year = config.CURRENT_YEAR - 1
+    target_year = last_year
+    
+    if commissioning_year is not None:
+        try:
+            year_int = int(commissioning_year)
+            target_year = min(year_int, last_year)
+        except (ValueError, TypeError):
+            pass
+    
+    LOGGER.debug("Open-Meteo request lat=%.4f lon=%.4f year=%d", lat, lon, target_year)
+    
+    # Fetch full year of wave data based on commissioning year or last year if not available
+    start_date = datetime(target_year, 1, 1).date()
+    end_date = datetime(target_year, 12, 31).date()
+    
+    url = "https://marine-api.open-meteo.com/v1/marine"
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": "wave_height",
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
+        "timezone": "UTC",
+    }
+    
+    try:
+        response = requests.get(url, params=params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        
+        if "hourly" in data and "wave_height" in data["hourly"]:
+            wave_heights = [h for h in data["hourly"]["wave_height"] if h is not None and h > 0]
+            if wave_heights:
+                mean_height = float(np.mean(wave_heights))
+                LOGGER.debug("Open-Meteo result lat=%.4f lon=%.4f year=%d mean_wave_height=%.3f m", lat, lon, target_year, mean_height)
+                return mean_height
+    except Exception as exc:
+        LOGGER.warning("Open-Meteo request failed for lat=%.4f lon=%.4f year=%d: %s", lat, lon, target_year, exc)
+    
+    # Fallback 1: Try current conditions
+    LOGGER.debug("Fallback 1: Trying current wave height for lat=%.4f lon=%.4f", lat, lon)
+    try:
+        current_params = {
+            "latitude": lat,
+            "longitude": lon,
+            "current": "wave_height",
+            "timezone": "UTC",
+        }
+        response = requests.get(url, params=current_params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        
+        if "current" in data and "wave_height" in data["current"]:
+            wave_height = data["current"]["wave_height"]
+            if wave_height is not None and wave_height > 0:
+                LOGGER.info("Using current wave height %.3f m for lat=%.4f lon=%.4f", wave_height, lat, lon)
+                return float(wave_height)
+    except Exception as exc:
+        LOGGER.warning("Current wave height fallback failed for lat=%.4f lon=%.4f: %s", lat, lon, exc)
+    
+    # Fallback 2: Use default if API fails
+    LOGGER.warning("Using fallback wave height 2.0 m for lat=%.4f lon=%.4f", lat, lon)
+    return 2.0
