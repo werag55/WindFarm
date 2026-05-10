@@ -1,87 +1,115 @@
 """Indexation functions for adjusting project budgets based on age and inflation."""
 
+import logging
+
+import numpy as np
 import pandas as pd
 import wbgapi as wb
 
-from src.data_preparation.cleanup import LOGGER
 from .. import config
 
-# country names as used in the dataset to ISO3 codes used by World Bank API
+LOGGER = logging.getLogger(__name__)
+
+INDEXATION_MODES = (
+    "no_indexation",
+    "static_2pct",
+    "static_3pct",
+    "static_5pct",
+    "world_bank_cpi",
+)
+
 country_map = {
-    'Belgium': 'BEL',
-    'Denmark': 'DNK',
-    'Finland': 'FIN',
-    'France': 'FRA',
-    'Germany': 'DEU',
-    'Greece': 'GRC',
-    'Ireland': 'IRL',
-    'Italy': 'ITA',
-    'Netherlands': 'NLD',
-    'Norway': 'NOR',
-    'Poland': 'POL',
-    'Portugal': 'PRT',
-    'Spain': 'ESP',
-    'Sweden': 'SWE',
-    'UK': 'GBR'
+    "Belgium": "BEL", "Denmark": "DNK", "Finland": "FIN", "France": "FRA",
+    "Germany": "DEU", "Greece": "GRC", "Ireland": "IRL", "Italy": "ITA",
+    "Netherlands": "NLD", "Norway": "NOR", "Poland": "POL", "Portugal": "PRT",
+    "Spain": "ESP", "Sweden": "SWE", "UK": "GBR",
 }
 
+_CPI_CACHE: dict[str, pd.Series | None] = {}
+
+
 def get_inflation_series(country_code: str):
-    """
-    Fetches historical Consumer Price Index (CPI) from World Bank.
-    """
+    if country_code in _CPI_CACHE:
+        return _CPI_CACHE[country_code]
     try:
-        # Returns a pandas DataFrame of CPI values indexed by year
-        data = wb.data.DataFrame('FP.CPI.TOTL', country_code)
+        data = wb.data.DataFrame("FP.CPI.TOTL", country_code)
         if data.empty:
+            _CPI_CACHE[country_code] = None
             return None
         series = data.iloc[0]
-        series.index = [int(str(i).replace('YR', '')) for i in series.index]
-        return series.sort_index()
+        series.index = [int(str(i).replace("YR", "")) for i in series.index]
+        series = series.sort_index()
+        _CPI_CACHE[country_code] = series
+        return series
     except Exception as e:
-        print(f"Error fetching data for {country_code}: {e}")
+        LOGGER.warning("Error fetching CPI for %s: %s", country_code, e)
+        _CPI_CACHE[country_code] = None
         return None
 
-def _index_budget_for_age(df: pd.DataFrame) -> pd.DataFrame:
-    """Index budgets using dynamic World Bank inflation data."""
 
-    def _index_row(row):
+def _static_factor(year: int, target_year: int, rate: float) -> float:
+    age = target_year - year
+    return (1 + rate) ** max(age, 0)
+
+
+def _index_budget_for_age(
+    df: pd.DataFrame, mode: str = "world_bank_cpi"
+) -> pd.DataFrame:
+    """Index project budgets to `INDEXED_BY_YEAR` according to `mode`."""
+    if mode not in INDEXATION_MODES:
+        raise ValueError(f"Unknown indexation mode: {mode!r}. "
+                         f"Choose from {INDEXATION_MODES}")
+
+    target_year = config.INDEXED_BY_YEAR
+
+    def _row(row):
         budget = row["total_project_budget_eur"]
         year = row["commissioning_year"]
-        country = row["country"]
-        
+        country = row.get("country")
+
         if pd.isna(budget) or pd.isna(year):
             return budget, "missing_budget_or_year"
 
         year = int(year)
-        indexed_by_year = config.INDEXED_BY_YEAR
         age = config.CURRENT_YEAR - year
-        
+
+        # Recent projects: never indexed
         if age <= config.MAX_DATA_AGE_YEARS:
             return budget, "recent"
 
+        if mode == "no_indexation":
+            return budget, "no_indexation"
+
+        if mode == "static_2pct":
+            return budget * _static_factor(year, target_year, 0.02), "static_2pct"
+        if mode == "static_3pct":
+            return budget * _static_factor(year, target_year, 0.03), "static_3pct"
+        if mode == "static_5pct":
+            return budget * _static_factor(year, target_year, 0.05), "static_5pct"
+
+        # world_bank_cpi
         wb_code = country_map.get(country, country)
-        cpi_series = get_inflation_series(wb_code)
-
-        if cpi_series is not None and year in cpi_series.index and indexed_by_year in cpi_series.index:
-            # Formula: Budget * (CPI_today / CPI_then)
-            cpi_start = cpi_series.get(year)
-            cpi_end = cpi_series.get(indexed_by_year)
-
+        cpi = get_inflation_series(wb_code) if wb_code else None
+        if (
+            cpi is not None
+            and year in cpi.index
+            and target_year in cpi.index
+        ):
+            cpi_start, cpi_end = cpi.get(year), cpi.get(target_year)
             if cpi_start and cpi_end:
-                factor = cpi_end / cpi_start
-                return budget * factor, f"indexed_wb_{year}"
-        
-        # Fallback to static config if API data is missing
-        LOGGER.warning(f"No CPI for {wb_code} in year {year}, using fallback")
-        indexed_age = indexed_by_year - year
-        factor = (1 + config.INFLATION_INDEX) ** indexed_age
-        return budget * factor, f"indexed_static_{indexed_age}y"
+                return budget * (cpi_end / cpi_start), f"wb_cpi_{year}"
+        # Fallback to static 2%
+        LOGGER.debug("CPI fallback to 2%% for %s/%s", wb_code, year)
+        return budget * _static_factor(year, target_year, 0.02), f"wb_fallback_static_2pct_{year}"
 
-    indexed_budget, quality = zip(*df.apply(_index_row, axis=1))
+    indexed_budget, quality = zip(*df.apply(_row, axis=1))
     df["total_project_budget_eur_indexed"] = indexed_budget
     df["data_quality_flag"] = quality
     return df
 
-def build_indexed_dataset(df: pd.DataFrame) -> pd.DataFrame:
-    """Create the indexed dataset."""
-    return _index_budget_for_age(df.copy())
+
+def build_indexed_dataset(
+    df: pd.DataFrame, mode: str = "world_bank_cpi"
+) -> pd.DataFrame:
+    """Create the indexed dataset (default = World Bank CPI)."""
+    return _index_budget_for_age(df.copy(), mode=mode)
