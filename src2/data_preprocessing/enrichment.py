@@ -240,6 +240,6 @@ def _get_mean_wave_height(latitude: float, longitude: float, commissioning_year:
     except Exception as exc:
         LOGGER.warning("Current wave height fallback failed for lat=%.4f lon=%.4f: %s", lat, lon, exc)
     
-    # Fallback 2: Use default if API fails
-    LOGGER.warning("Using fallback wave height 2.0 m for lat=%.4f lon=%.4f", lat, lon)
-    return 2.0
+    # Return NaN if all attempts fail
+    LOGGER.warning("[wave height] All attempts failed for lat=%.4f lon=%.4f", lat, lon)
+    return np.nan
