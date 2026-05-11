@@ -13,6 +13,7 @@ from .. import config
 from ..calculations.calculations import calculate
 from ..data_preprocessing.enrichment import add_environmental_columns, add_distance_from_port, add_distance_from_construction_port
 from .components import create_input_form
+from .clustering import create_closest_farms_table, create_clustering_panel, prepare_clustering_dataframe
 from .profitability_map import profitability_map
 
 LOGGER = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ LOGGER = logging.getLogger(__name__)
 def create_app(df: pd.DataFrame, model):
     """Create and configure the Dash application."""
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+    clustering_df = prepare_clustering_dataframe(df)
 
     app.layout = dbc.Container([
         dbc.Row(dbc.Col(html.H1("Offshore Wind Farm Profitability Analysis"), width=12)),
@@ -41,13 +43,17 @@ def create_app(df: pd.DataFrame, model):
             dbc.Col(create_input_form(df), width=3)
         ]), 
         dbc.Row(dbc.Col(html.Div(id='prediction-output'))),
+        dbc.Row(dbc.Col(create_clustering_panel(clustering_df))),
     ], fluid=True)
 
     @app.callback(
         [Output('map-graph', 'figure'),
-         Output('prediction-output', 'children')],
+         Output('prediction-output', 'children'),
+         Output('cluster-output', 'children')],
         [Input('color-column-dropdown', 'value'),
-         Input('predict-button', 'n_clicks')],
+         Input('predict-button', 'n_clicks'),
+         Input('cluster-metrics-checklist', 'value'),
+         Input('cluster-scaling-dropdown', 'value')],
         [State('lat-input', 'value'), State('lon-input', 'value'),
          State('area-input', 'value'), State('country-dropdown', 'value'),
          State('year-input', 'value'), State('turbine-power-input', 'value'),
@@ -56,12 +62,12 @@ def create_app(df: pd.DataFrame, model):
          State('shore-min-input', 'value'), State('shore-max-input', 'value'),
          State('lifetime-input', 'value'), State('capacity-input', 'value')]
     )
-    def update_map(color_column, n_clicks, lat, lon, area, country, year, turbine_power, producer, foundation, depth_min, depth_max, shore_min, shore_max, lifetime, capacity):
+    def update_map(color_column, n_clicks, cluster_metrics, cluster_scaling, lat, lon, area, country, year, turbine_power, producer, foundation, depth_min, depth_max, shore_min, shore_max, lifetime, capacity):
         """Update the map based on dropdown and prediction."""
 
         # Prepare new sample for prediction
         new_sample = pd.DataFrame([{
-            "wind_farm_name": "New Sample",
+            "wind_farm_name": "Proposed Wind Farm",
             "LAT": lat, "LON": lon, "area_sqkm": area, "country": country,
             "commissioning_year": year, "turbine_power_MW": turbine_power,
             "turbine_producer": producer, "foundation_type": foundation,
@@ -101,6 +107,12 @@ def create_app(df: pd.DataFrame, model):
         new_sample["total_project_budget_eur_indexed"] = prediction
         new_sample["total_project_budget_eur"] = prediction
         new_sample_calculated = calculate(new_sample)
+        clustering_table = create_closest_farms_table(
+            clustering_df,
+            new_sample_calculated.iloc[0],
+            cluster_metrics,
+            cluster_scaling,
+        )
 
         # Combine historical and new data
         combined_df = pd.concat([df, new_sample_calculated], ignore_index=True)
@@ -137,7 +149,7 @@ def create_app(df: pd.DataFrame, model):
             ], className="mt-2"),
         ])
 
-        return profitability_map(combined_df, color_column), output_div
+        return profitability_map(combined_df, color_column), output_div, clustering_table
 
     return app
 
