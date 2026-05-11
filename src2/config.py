@@ -65,37 +65,55 @@ CATEGORICAL_COLUMNS = [
 
 def get_connection_details(country: str, year: float) -> dict:
     """Determine OSS Responsibility, Offshore Cable, Onshore Connection, and Model Type."""
-    if not country or str(year) == "nan":
-        return {"oss_responsibility": "Unknown", "offshore_cable": "Unknown", "onshore_connection": "Unknown", "model_type": "Unknown"}
-    
-    y = int(year)
+    unknown = {"oss_responsibility": "Unknown", "offshore_cable": "Unknown", "onshore_connection": "Unknown", "model_type": "Unknown"}
+    if not country or str(country).strip().lower() in {"", "nan", "none", "unknown"}:
+        return unknown
+
     c = str(country).strip()
-    
+    year_known = year is not None and str(year) != "nan"
+    y = int(year) if year_known else None
+
+    # Year-independent countries: resolve immediately so rows without commissioning_year still get mapped.
     if c == "Germany":
         return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
-    elif c == "UK":
-        if y < 2011: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
-        else: return {"oss_responsibility": "OFTO", "offshore_cable": "OFTO", "onshore_connection": "OFTO", "model_type": "OFTO"}
-    elif c == "Netherlands":
-        if y < 2016: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "TSO", "model_type": "Developer-led"}
-        else: return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
-    elif c == "Denmark":
-        if y <= 2020: return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
-        else: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
-    elif c == "Belgium":
-        if y < 2019: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "TSO", "model_type": "Developer-led"}
-        else: return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
-    elif c == "France":
+    if c == "France":
         return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
-    elif c == "Norway":
+    if c == "Norway":
         return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
-    elif c == "Poland":
+    if c == "Poland":
         return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer/TSO", "model_type": "Developer-led"}
-    elif c == "Sweden":
+    if c == "Finland":
+        return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
+    if c == "Portugal":
+        return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
+    if c == "Italy":
+        return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
+
+    # Year-dependent countries — Unknown if commissioning_year is missing.
+    if not year_known:
+        return unknown
+
+    if c == "UK":
+        if y < 2011: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
+        return {"oss_responsibility": "OFTO", "offshore_cable": "OFTO", "onshore_connection": "OFTO", "model_type": "OFTO"}
+    if c == "Netherlands":
+        if y < 2016: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "TSO", "model_type": "Developer-led"}
+        return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
+    if c == "Denmark":
+        if y <= 2020: return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
+        return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
+    if c == "Belgium":
+        if y < 2019: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "TSO", "model_type": "Developer-led"}
+        return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
+    if c == "Sweden":
         if y < 2021: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
-        else: return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
-        
-    return {"oss_responsibility": "Unknown", "offshore_cable": "Unknown", "onshore_connection": "Unknown", "model_type": "Unknown"}
+        return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
+    if c == "Ireland":
+        # EirGrid is moving toward TSO-led offshore grid planning; 2031 used as the practical cutoff.
+        if y < 2031: return {"oss_responsibility": "Developer", "offshore_cable": "Developer", "onshore_connection": "Developer", "model_type": "Developer-led"}
+        return {"oss_responsibility": "TSO", "offshore_cable": "TSO", "onshore_connection": "TSO", "model_type": "TSO-led"}
+
+    return unknown
 
 RANGE_COLUMNS = {
     "water_depth_m": "m",
