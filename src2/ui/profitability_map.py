@@ -28,7 +28,6 @@ def profitability_map(df: pd.DataFrame, color_column: str) -> go.Figure:
             "distance_from_shore_km": True,
             "water_depth_m": True,
             "distance_from_port_km": ":.1f",
-            "distance_from_construction_port_km": ":.1f",
         },
         size="installed_capacity_MW",
         color=color_column,

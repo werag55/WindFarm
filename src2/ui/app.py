@@ -11,7 +11,12 @@ from waitress import serve
 
 from .. import config
 from ..calculations.calculations import calculate
-from ..data_preprocessing.enrichment import add_environmental_columns, add_distance_from_port, add_distance_from_construction_port
+from ..data_preprocessing.enrichment import (
+    add_distance_from_port,
+    add_distance_from_shore,
+    add_environmental_columns,
+    add_water_depth,
+)
 from .components import create_input_form
 from .profitability_map import profitability_map
 
@@ -52,11 +57,9 @@ def create_app(df: pd.DataFrame, model):
          State('area-input', 'value'), State('country-dropdown', 'value'),
          State('year-input', 'value'), State('turbine-power-input', 'value'),
          State('producer-dropdown', 'value'), State('foundation-dropdown', 'value'),
-         State('depth-min-input', 'value'), State('depth-max-input', 'value'),
-         State('shore-min-input', 'value'), State('shore-max-input', 'value'),
          State('lifetime-input', 'value'), State('capacity-input', 'value')]
     )
-    def update_map(color_column, n_clicks, lat, lon, area, country, year, turbine_power, producer, foundation, depth_min, depth_max, shore_min, shore_max, lifetime, capacity):
+    def update_map(color_column, n_clicks, lat, lon, area, country, year, turbine_power, producer, foundation, lifetime, capacity):
         """Update the map based on dropdown and prediction."""
 
         # Prepare new sample for prediction
@@ -65,24 +68,19 @@ def create_app(df: pd.DataFrame, model):
             "LAT": lat, "LON": lon, "area_sqkm": area, "country": country,
             "commissioning_year": year, "turbine_power_MW": turbine_power,
             "turbine_producer": producer, "foundation_type": foundation,
-            "water_depth_min_m": depth_min, "water_depth_max_m": depth_max,
-            "distance_from_shore_min_km": shore_min, "distance_from_shore_max_km": shore_max,
             "project_lifetime_years": lifetime, "installed_capacity_MW": capacity,
         }])
-
-        # Calculate mean values
-        new_sample["water_depth_mean_m"] = new_sample[["water_depth_min_m", "water_depth_max_m"]].mean(axis=1)
-        new_sample["distance_from_shore_mean_km"] = new_sample[["distance_from_shore_min_km", "distance_from_shore_max_km"]].mean(axis=1)
 
         # Enrich grid connection info
         conn_details = config.get_connection_details(country, year)
         for key, value in conn_details.items():
             new_sample[key] = value
 
-        # Enrich with environmental data
+        # Enrich with environmental and geospatial data
         new_sample = add_environmental_columns(new_sample)
         new_sample = add_distance_from_port(new_sample)
-        new_sample = add_distance_from_construction_port(new_sample)
+        new_sample = add_water_depth(new_sample)
+        new_sample = add_distance_from_shore(new_sample)
 
         # One-hot encode categorical features
         for col in config.CATEGORICAL_COLUMNS:
@@ -127,12 +125,16 @@ def create_app(df: pd.DataFrame, model):
             ]),
             dbc.Row([
                 dbc.Col(dbc.Card([
-                    dbc.CardHeader("Distance from Port (shapefile)"),
+                    dbc.CardHeader("Distance from Port"),
                     dbc.CardBody(f"{new_sample_calculated['distance_from_port_km'].iloc[0]:,.1f} km")
                 ]), width=3),
                 dbc.Col(dbc.Card([
-                    dbc.CardHeader("Distance from Construction Port"),
-                    dbc.CardBody(f"{new_sample_calculated['distance_from_construction_port_km'].iloc[0]:,.1f} km")
+                    dbc.CardHeader("Water Depth"),
+                    dbc.CardBody(f"{new_sample_calculated['water_depth_mean_m'].iloc[0]:,.1f} m")
+                ]), width=3),
+                dbc.Col(dbc.Card([
+                    dbc.CardHeader("Distance from Shore"),
+                    dbc.CardBody(f"{new_sample_calculated['distance_from_shore_mean_km'].iloc[0]:,.1f} km")
                 ]), width=3),
             ], className="mt-2"),
         ])

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from functools import lru_cache
+from pathlib import Path
 import logging
 import math
 
@@ -12,7 +13,6 @@ import wind_stats
 
 from shapely.geometry import Point
 import geopandas as gpd
-from pathlib import Path
 
 from .. import config
 
@@ -51,6 +51,8 @@ CONSTRUCTION_PORTS = [
 ]
 
 _CONSTRUCTION_PORTS_GDF: gpd.GeoDataFrame | None = None
+_COASTLINE_GDF: gpd.GeoDataFrame | None = None
+
 
 def _get_construction_ports_gdf() -> gpd.GeoDataFrame:
     """Return a GeoDataFrame of construction ports."""
@@ -65,16 +67,31 @@ def _get_construction_ports_gdf() -> gpd.GeoDataFrame:
     return _CONSTRUCTION_PORTS_GDF
 
 
-def add_distance_from_construction_port(df: pd.DataFrame) -> pd.DataFrame:
-    """Add distance_from_construction_port_km column"""
+def _get_coastline_gdf() -> gpd.GeoDataFrame:
+    """Return a GeoDataFrame of the world coastline (Natural Earth 110m), cached on disk."""
+    global _COASTLINE_GDF
+    if _COASTLINE_GDF is None:
+        cache_path = Path(__file__).parent.parent.parent / "data" / "ne_110m_coastline.geojson"
+        if not cache_path.exists():
+            LOGGER.info("Downloading Natural Earth coastline to %s", cache_path)
+            response = requests.get(config.COASTLINE_URL, timeout=60)
+            response.raise_for_status()
+            cache_path.write_bytes(response.content)
+        _COASTLINE_GDF = gpd.read_file(cache_path).to_crs("EPSG:4326")
+    return _COASTLINE_GDF
+
+
+def add_distance_from_port(df: pd.DataFrame) -> pd.DataFrame:
+    """Add distance_from_port_km column using European offshore wind construction ports."""
     ports_gdf = _get_construction_ports_gdf()
-    df["distance_from_construction_port_km"] = df.apply(
-        lambda row: _get_distance_from_port(row["LAT"], row["LON"], ports_gdf)
+    df["distance_from_port_km"] = df.apply(
+        lambda row: _distance_to_features_km(row["LAT"], row["LON"], ports_gdf)
         if pd.notna(row.get("LAT")) and pd.notna(row.get("LON"))
         else np.nan,
         axis=1,
     )
     return df
+
 
 def add_environmental_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Attach mean wind speed and wave data, using GWA."""
@@ -82,7 +99,7 @@ def add_environmental_columns(df: pd.DataFrame) -> pd.DataFrame:
         df["mean_wind_speed_mps"] = np.nan
     if "mean_wave_height_m" not in df.columns:
         df["mean_wave_height_m"] = np.nan
-        
+
     df["mean_wind_speed_mps"] = df.apply(
         lambda row: _get_mean_wind_speed_from_gwa(row["LAT"], row["LON"]) \
             if pd.isna(row["mean_wind_speed_mps"]) \
@@ -97,6 +114,128 @@ def add_environmental_columns(df: pd.DataFrame) -> pd.DataFrame:
             else row["mean_wave_height_m"],
         axis=1,
     )
+    return df
+
+
+def add_water_depth(df: pd.DataFrame) -> pd.DataFrame:
+    """Fetch water depth from GEBCO bathymetry and fill missing depth columns."""
+
+    df = df.copy()
+
+    for col in ("water_depth_min_m", "water_depth_max_m", "water_depth_mean_m"):
+        if col not in df.columns:
+            df[col] = np.nan
+        else:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    def _fill(row):
+        existing_mean = row.get("water_depth_mean_m")
+
+        if pd.notna(existing_mean):
+            depth = float(existing_mean)
+        else:
+            if pd.isna(row.get("LAT")) or pd.isna(row.get("LON")):
+                return pd.Series(
+                    [row["water_depth_min_m"], row["water_depth_max_m"], np.nan]
+                )
+
+            depth = _get_water_depth(row["LAT"], row["LON"])
+
+        if pd.isna(depth):
+            return pd.Series(
+                [row["water_depth_min_m"], row["water_depth_max_m"], np.nan]
+            )
+
+        min_depth = row["water_depth_min_m"]
+        max_depth = row["water_depth_max_m"]
+
+        if pd.isna(min_depth):
+            min_depth = depth
+        if pd.isna(max_depth):
+            max_depth = depth
+
+        return pd.Series([min_depth, max_depth, depth])
+
+    filled = df.apply(_fill, axis=1)
+
+    df["water_depth_min_m"] = filled[0]
+    df["water_depth_max_m"] = filled[1]
+    df["water_depth_mean_m"] = filled[2]
+
+    LOGGER.info(
+        "Water depth enrichment: filled=%d/%d",
+        int(df["water_depth_mean_m"].notna().sum()),
+        len(df),
+    )
+
+    return df
+
+
+def add_distance_from_shore(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate distance from shore via Natural Earth coastline."""
+
+    df = df.copy()
+
+    for col in (
+        "distance_from_shore_min_km",
+        "distance_from_shore_max_km",
+        "distance_from_shore_mean_km",
+    ):
+        if col not in df.columns:
+            df[col] = np.nan
+        else:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    coastline_gdf = _get_coastline_gdf()
+
+    def _fill(row):
+        existing_mean = row.get("distance_from_shore_mean_km")
+
+        if pd.notna(existing_mean):
+            dist = float(existing_mean)
+        else:
+            if pd.isna(row.get("LAT")) or pd.isna(row.get("LON")):
+                return pd.Series(
+                    [
+                        row["distance_from_shore_min_km"],
+                        row["distance_from_shore_max_km"],
+                        np.nan,
+                    ]
+                )
+
+            dist = _distance_to_features_km(row["LAT"], row["LON"], coastline_gdf)
+
+        if pd.isna(dist):
+            return pd.Series(
+                [
+                    row["distance_from_shore_min_km"],
+                    row["distance_from_shore_max_km"],
+                    np.nan,
+                ]
+            )
+
+        min_dist = row["distance_from_shore_min_km"]
+        max_dist = row["distance_from_shore_max_km"]
+
+        if pd.isna(min_dist):
+            min_dist = dist
+        if pd.isna(max_dist):
+            max_dist = dist
+
+        return pd.Series([min_dist, max_dist, dist])
+
+    filled = df.apply(_fill, axis=1)
+
+    df["distance_from_shore_min_km"] = filled[0]
+    df["distance_from_shore_max_km"] = filled[1]
+    df["distance_from_shore_mean_km"] = filled[2]
+
+    LOGGER.info(
+        "Distance from shore enrichment: filled=%d/%d",
+        int(df["distance_from_shore_mean_km"].notna().sum()),
+        len(df),
+    )
+
     return df
 
 @lru_cache(maxsize=512)
@@ -123,78 +262,83 @@ def _get_mean_wind_speed_from_gwa(latitude: float, longitude: float) -> float:
     return wind_speed
 
 
-def _get_distance_from_port(lat: float, lon: float, ports_gdf) -> float:
-    """Calculate distance in km from nearest port using preloaded GeoDataFrame."""
-    farm_point = Point(lon, lat)
-    distances = ports_gdf.geometry.distance(farm_point)
-    # distance() returns degrees if CRS is EPSG:4326, convert to km
-    min_dist_deg = distances.min()
-    # rough conversion: 1 degree = 111 km
-    return min_dist_deg * 111.0
+def _distance_to_features_km(
+    lat: float,
+    lon: float,
+    features_gdf: gpd.GeoDataFrame,
+) -> float:
+    """Return distance in km from (lat, lon) to nearest feature geometry.
 
+    Uses EPSG:3035, a projected CRS suitable for Europe.
+    """
 
-def add_distance_from_port(df: pd.DataFrame) -> pd.DataFrame:
-    """Add distance_from_port_km column based on wind farm coordinates."""
-
-    PORTS_SHP_PATHS = [
-        Path(__file__).parent.parent.parent / "data" / "ports" / "Harbours_EMODnet_OSM_HOLAS3.shp",
-        Path(__file__).parent.parent.parent / "data" / "ports" / "Harbours.shp",
-    ]
+    if pd.isna(lat) or pd.isna(lon):
+        return np.nan
 
     try:
-        gdfs = []
-        for path in PORTS_SHP_PATHS:
-            if path.exists():
-                gdf = gpd.read_file(path)
-                gdfs.append(gdf)
-        if not gdfs:
-            LOGGER.warning("No port shapefiles found, skipping distance_from_port_km")
-            df["distance_from_port_km"] = np.nan
-            return df
+        features = features_gdf.copy()
 
-        ports_gdf = pd.concat(gdfs, ignore_index=True)
-        ports_gdf = gpd.GeoDataFrame(ports_gdf, geometry="geometry")
-        if ports_gdf.crs is None:
-            ports_gdf = ports_gdf.set_crs("EPSG:4326")
-        else:
-            ports_gdf = ports_gdf.to_crs("EPSG:4326")
+        if features.empty:
+            return np.nan
 
-        LOGGER.info(f"Loaded {len(ports_gdf)} ports from shapefiles")
+        if features.crs is None:
+            features = features.set_crs("EPSG:4326")
 
-        df["distance_from_port_km"] = df.apply(
-            lambda row: _get_distance_from_port(row["LAT"], row["LON"], ports_gdf)
-            if pd.notna(row.get("LAT")) and pd.notna(row.get("LON"))
-            else np.nan,
-            axis=1,
+        features = features[
+            features.geometry.notna()
+            & ~features.geometry.is_empty
+            & features.geometry.is_valid
+        ].copy()
+
+        if features.empty:
+            return np.nan
+
+        farm_gdf = gpd.GeoDataFrame(
+            geometry=[Point(float(lon), float(lat))],
+            crs="EPSG:4326",
         )
 
-    except Exception as e:
-        LOGGER.error(f"Failed to calculate distance from port: {e}")
-        df["distance_from_port_km"] = np.nan
+        features_proj = features.to_crs("EPSG:3035")
+        farm_proj = farm_gdf.to_crs("EPSG:3035")
 
-    return df
+        distances_m = features_proj.geometry.distance(farm_proj.geometry.iloc[0])
+        distances_m = distances_m.replace([np.inf, -np.inf], np.nan).dropna()
+
+        if distances_m.empty:
+            return np.nan
+
+        return float(distances_m.min() / 1000.0)
+
+    except Exception as exc:
+        LOGGER.warning(
+            "Distance calculation failed for lat=%s lon=%s: %s",
+            lat,
+            lon,
+            exc,
+        )
+        return np.nan
+
 
 def _get_mean_wave_height(latitude: float, longitude: float, commissioning_year: int = None) -> float:
     """Fetch mean wave height from Open-Meteo Marine API for a specific year."""
     lat = round(float(latitude), config.GWA_COORDINATE_ROUND_DECIMALS)
     lon = round(float(longitude), config.GWA_COORDINATE_ROUND_DECIMALS)
-    
+
     last_year = config.CURRENT_YEAR - 1
     target_year = last_year
-    
+
     if commissioning_year is not None:
         try:
             year_int = int(commissioning_year)
             target_year = min(year_int, last_year)
         except (ValueError, TypeError):
             pass
-    
+
     LOGGER.debug("Open-Meteo request lat=%.4f lon=%.4f year=%d", lat, lon, target_year)
-    
-    # Fetch full year of wave data based on commissioning year or last year if not available
+
     start_date = datetime(target_year, 1, 1).date()
     end_date = datetime(target_year, 12, 31).date()
-    
+
     url = "https://marine-api.open-meteo.com/v1/marine"
     params = {
         "latitude": lat,
@@ -204,42 +348,35 @@ def _get_mean_wave_height(latitude: float, longitude: float, commissioning_year:
         "end_date": end_date.isoformat(),
         "timezone": "UTC",
     }
-    
-    try:
-        response = requests.get(url, params=params, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        
-        if "hourly" in data and "wave_height" in data["hourly"]:
-            wave_heights = [h for h in data["hourly"]["wave_height"] if h is not None and h > 0]
-            if wave_heights:
-                mean_height = float(np.mean(wave_heights))
-                LOGGER.debug("Open-Meteo result lat=%.4f lon=%.4f year=%d mean_wave_height=%.3f m", lat, lon, target_year, mean_height)
-                return mean_height
-    except Exception as exc:
-        LOGGER.warning("Open-Meteo request failed for lat=%.4f lon=%.4f year=%d: %s", lat, lon, target_year, exc)
-    
-    # Fallback 1: Try current conditions
-    LOGGER.debug("Fallback 1: Trying current wave height for lat=%.4f lon=%.4f", lat, lon)
-    try:
-        current_params = {
-            "latitude": lat,
-            "longitude": lon,
-            "current": "wave_height",
-            "timezone": "UTC",
-        }
-        response = requests.get(url, params=current_params, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        
-        if "current" in data and "wave_height" in data["current"]:
-            wave_height = data["current"]["wave_height"]
-            if wave_height is not None and wave_height > 0:
-                LOGGER.info("Using current wave height %.3f m for lat=%.4f lon=%.4f", wave_height, lat, lon)
-                return float(wave_height)
-    except Exception as exc:
-        LOGGER.warning("Current wave height fallback failed for lat=%.4f lon=%.4f: %s", lat, lon, exc)
-    
-    # Fallback 2: Use default if API fails
-    LOGGER.warning("Using fallback wave height 2.0 m for lat=%.4f lon=%.4f", lat, lon)
-    return 2.0
+
+    response = requests.get(url, params=params, timeout=30)
+    response.raise_for_status()
+    data = response.json()
+
+    wave_heights = [h for h in data["hourly"]["wave_height"] if h is not None and h > 0]
+    if not wave_heights:
+        LOGGER.warning("No wave data for lat=%.4f lon=%.4f year=%d", lat, lon, target_year)
+        return np.nan
+    mean_height = float(np.mean(wave_heights))
+    LOGGER.debug("Open-Meteo result lat=%.4f lon=%.4f year=%d mean_wave_height=%.3f m", lat, lon, target_year, mean_height)
+    return mean_height
+
+
+@lru_cache(maxsize=512)
+def _get_water_depth(latitude: float, longitude: float) -> float:
+    """Fetch water depth in meters from GEBCO bathymetry via OpenTopoData."""
+    lat = round(float(latitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    lon = round(float(longitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    LOGGER.debug("OpenTopoData GEBCO request lat=%.4f lon=%.4f", lat, lon)
+
+    url = "https://api.opentopodata.org/v1/gebco2020"
+    params = {"locations": f"{lat},{lon}"}
+    response = requests.get(url, params=params, timeout=30)
+    response.raise_for_status()
+    elevation = response.json()["results"][0]["elevation"]
+    if elevation is None or elevation >= 0:
+        LOGGER.warning("Non-marine elevation %s at lat=%.4f lon=%.4f", elevation, lat, lon)
+        return np.nan
+    depth = -float(elevation)
+    LOGGER.debug("GEBCO result lat=%.4f lon=%.4f depth=%.1f m", lat, lon, depth)
+    return depth
