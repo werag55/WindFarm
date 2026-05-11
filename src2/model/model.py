@@ -3,9 +3,11 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split, KFold, cross_validate
-from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn.linear_model import LinearRegression, Ridge, LassoCV, ElasticNetCV
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, median_absolute_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.compose import TransformedTargetRegressor
 import logging
 
 from .. import config
@@ -40,11 +42,26 @@ def train_model(df: pd.DataFrame):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
     models = {
-        "LinearRegression": LinearRegression(),
-        "Ridge": Ridge(),
-        "Lasso": Lasso(),
-        "ElasticNet": ElasticNet(),
+        #"LinearRegression": TransformedTargetRegressor(regressor=LinearRegression(), transformer=StandardScaler()),
+        "Ridge": TransformedTargetRegressor(regressor=Ridge(), transformer=StandardScaler()),
+        "Lasso": TransformedTargetRegressor(
+        regressor=LassoCV(alphas=np.logspace(-3, 3, 10), max_iter=10000, random_state=42), 
+        transformer=StandardScaler(),
+        ),
+        "ElasticNet": TransformedTargetRegressor(
+        regressor=ElasticNetCV(
+        l1_ratio=[.1, .5, .7, .9, .95, .99, 1],
+        alphas=np.logspace(-3, 3, 10),
+        max_iter=10000,
+        random_state=42
+        ),
+        transformer=StandardScaler()
+        ),
         "RandomForest": RandomForestRegressor(random_state=42),
         "GradientBoosting": GradientBoostingRegressor(random_state=42)
     }
@@ -86,8 +103,12 @@ def train_model(df: pd.DataFrame):
     # Feature importance for best model
     if hasattr(best_model, 'feature_importances_'):
         importances = best_model.feature_importances_
-    else:
+    elif hasattr(best_model, 'coef_'):
         importances = best_model.coef_
+    elif hasattr(best_model, 'regressor_') and hasattr(best_model.regressor_, 'coef_'):
+        importances = best_model.regressor_.coef_
+    else:
+        importances = np.zeros(len(X.columns))
         
     feature_importance = pd.DataFrame({'feature': X.columns, 'importance': np.abs(importances)})
 
