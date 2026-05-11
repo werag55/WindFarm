@@ -14,7 +14,22 @@ MANDATORY_COLUMNS = {
     "LAT",
     "LON",
     "installed_capacity_MW",
-    "total_project_budget"
+}
+
+# Project doc, section 4: założona gęstość mocy 8 MW/km²
+POWER_DENSITY_MW_PER_SQKM = 8.0
+
+# Merge near-duplicate foundation_type labels before one-hot encoding
+FOUNDATION_TYPE_MAPPING = {
+    "Gravity base": "Gravity-based",
+    "Floating": "Floating",
+    "Floating TLP": "Floating",
+    "Floating TetraSpar": "Floating",
+    "Floating SATH": "Floating",
+    "Floating concrete spar buoy": "Floating",
+    "Floating damping pool": "Floating",
+    "Floating semi-submersible": "Floating",
+    "Floating spar buoy": "Floating",
 }
 
 NUMERIC_COLUMNS = [

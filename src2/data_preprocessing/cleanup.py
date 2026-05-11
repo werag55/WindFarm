@@ -5,7 +5,12 @@ import pandas as pd
 import logging
 
 from .. import config
-from .parsing import parse_budget_to_eur, to_float_range_mean
+from .parsing import (
+    extract_turbine_info,
+    fill_missing_budget_eur,
+    parse_budget_to_eur,
+    to_float_range_mean,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -14,12 +19,16 @@ def prepare_cleaned_dataset(csv_path: str) -> pd.DataFrame:
     """Load, clean, and preprocess the raw dataset."""
     df = _load_raw_dataset(csv_path)
     df = _replace_commas_with_periods(df)
+    df = extract_turbine_info(df)
     df = parse_budget_to_eur(df)
+    df = fill_missing_budget_eur(df)
     df = _fill_default_values(df)
     df = _filter_incomplete_rows(df)
+    df = _normalize_foundation_type(df)
     df = _convert_range_columns(df)
     df = _convert_to_numeric(df)
-    
+    df = _fill_area_sqkm(df)
+
     # Enrich connection details based on rules
     conn_details = df.apply(lambda row: pd.Series(config.get_connection_details(row.get('country'), row.get('commissioning_year'))), axis=1)
     df = pd.concat([df, conn_details], axis=1)
@@ -98,6 +107,24 @@ def _convert_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
     for column in config.NUMERIC_COLUMNS:
         if column in df.columns:
             df[column] = pd.to_numeric(df[column], errors="coerce")
+    return df
+
+
+def _normalize_foundation_type(df: pd.DataFrame) -> pd.DataFrame:
+    """Merge near-duplicate foundation_type labels (e.g. all Floating variants → 'Floating')."""
+    if "foundation_type" not in df.columns:
+        return df
+    df["foundation_type"] = df["foundation_type"].replace(config.FOUNDATION_TYPE_MAPPING)
+    return df
+
+
+def _fill_area_sqkm(df: pd.DataFrame) -> pd.DataFrame:
+    """Estimate missing area_sqkm from installed_capacity_MW using the project's power density."""
+    if "area_sqkm" not in df.columns or "installed_capacity_MW" not in df.columns:
+        return df
+    mask = df["area_sqkm"].isna() & df["installed_capacity_MW"].notna()
+    df.loc[mask, "area_sqkm"] = df.loc[mask, "installed_capacity_MW"] / config.POWER_DENSITY_MW_PER_SQKM
+    LOGGER.info("Filled area_sqkm for %d rows at %.1f MW/km²", int(mask.sum()), config.POWER_DENSITY_MW_PER_SQKM)
     return df
 
 
