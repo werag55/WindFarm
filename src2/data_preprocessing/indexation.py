@@ -1,10 +1,13 @@
 """Indexation functions for adjusting project budgets based on age and inflation."""
 
+import logging
+
 import pandas as pd
 import wbgapi as wb
 
-from src.data_preparation.cleanup import LOGGER
 from .. import config
+
+LOGGER = logging.getLogger(__name__)
 
 # country names as used in the dataset to ISO3 codes used by World Bank API
 country_map = {
@@ -25,54 +28,58 @@ country_map = {
     'UK': 'GBR'
 }
 
+_CPI_CACHE: dict[str, pd.Series | None] = {}
+
+
 def get_inflation_series(country_code: str):
-    """
-    Fetches historical Consumer Price Index (CPI) from World Bank.
-    """
+    """Fetch historical Consumer Price Index (CPI) from World Bank, cached per country."""
+    if country_code in _CPI_CACHE:
+        return _CPI_CACHE[country_code]
     try:
-        # Returns a pandas DataFrame of CPI values indexed by year
         data = wb.data.DataFrame('FP.CPI.TOTL', country_code)
         if data.empty:
+            _CPI_CACHE[country_code] = None
             return None
         series = data.iloc[0]
         series.index = [int(str(i).replace('YR', '')) for i in series.index]
-        return series.sort_index()
-    except Exception as e:
-        print(f"Error fetching data for {country_code}: {e}")
-        return None
+        series = series.sort_index()
+    except Exception as exc:
+        LOGGER.warning("CPI fetch failed for %s: %s", country_code, exc)
+        series = None
+    _CPI_CACHE[country_code] = series
+    return series
+
 
 def _index_budget_for_age(df: pd.DataFrame) -> pd.DataFrame:
-    """Index budgets using dynamic World Bank inflation data."""
+    """Index every budget to INDEXED_BY_YEAR using World Bank CPI, with a static fallback."""
+
+    indexed_by_year = config.INDEXED_BY_YEAR
 
     def _index_row(row):
         budget = row["total_project_budget_eur"]
         year = row["commissioning_year"]
         country = row["country"]
-        
+
         if pd.isna(budget) or pd.isna(year):
             return budget, "missing_budget_or_year"
 
         year = int(year)
-        indexed_by_year = config.INDEXED_BY_YEAR
-        age = config.CURRENT_YEAR - year
-        
-        if age <= config.MAX_DATA_AGE_YEARS:
-            return budget, "recent"
+        if year == indexed_by_year:
+            return budget, "indexed_base"
 
         wb_code = country_map.get(country, country)
         cpi_series = get_inflation_series(wb_code)
 
         if cpi_series is not None and year in cpi_series.index and indexed_by_year in cpi_series.index:
-            # Formula: Budget * (CPI_today / CPI_then)
             cpi_start = cpi_series.get(year)
             cpi_end = cpi_series.get(indexed_by_year)
-
             if cpi_start and cpi_end:
                 factor = cpi_end / cpi_start
                 return budget * factor, f"indexed_wb_{year}"
-        
-        # Fallback to static config if API data is missing
-        LOGGER.warning(f"No CPI for {wb_code} in year {year}, using fallback")
+
+        # Fallback: compound config.INFLATION_INDEX across the year gap.
+        # Works in both directions (year > indexed_by_year => deflate, factor < 1).
+        LOGGER.warning("No CPI for %s in year %s, using static fallback", wb_code, year)
         indexed_age = indexed_by_year - year
         factor = (1 + config.INFLATION_INDEX) ** indexed_age
         return budget * factor, f"indexed_static_{indexed_age}y"

@@ -176,10 +176,21 @@ def _get_currency_rate(currency: str, year: int) -> float:
 
 
 def _parse_single_budget(text: str, commissioning_year: int) -> float:
-    """Parse a single budget string into EUR."""
-    if pd.isna(text):
+    """Parse a single budget string into EUR.
+
+    Pre-1999 EUR labels (e.g. "EUR 10 million" for the 1991 Vindeby project) are treated
+    as already-normalized EUR figures — the dataset reports them in retrospective EUR.
+    Pre-1999 non-EUR rates that forex-python cannot resolve fall back to
+    config.CURRENCY_TO_EUR_IN_YEAR.
+    """
+    if _is_missing(text):
         return np.nan
     raw = str(text)
+    # "(combined 1+2)", "(combined A+B)", "(combined N+S)" mark wind farms whose
+    # budget already covers multiple sub-phases. Strip the parenthetical so the
+    # number extractor doesn't pull "1" and "2" into the mean.
+    raw = re.sub(r"\s*\([^)]*\)\s*", " ", raw).strip()
+
     year = commissioning_year if pd.notna(commissioning_year) else datetime.now().year
 
     currency = next((cur for cur in config.SUPPORTED_CURRENCIES if cur in raw), None)
