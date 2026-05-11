@@ -305,8 +305,22 @@ def _get_harbour_ports_gdf() -> gpd.GeoDataFrame | None:
     merged = gpd.GeoDataFrame(merged, geometry="geometry")
 
     if merged.crs is None:
-        LOGGER.warning("Harbour shapefile has no CRS — assuming EPSG:4326")
-        merged = merged.set_crs(GEOGRAPHIC_CRS)
+        # HOLAS3 / EMODnet harbour shapefiles ship without .prj. Their coordinates
+        # are WebMercator (EPSG:3857) — x values run into the millions, well outside
+        # the [-180, 180] / [-90, 90] range of geographic coords. Detect this and
+        # set the CRS accordingly instead of blindly defaulting to EPSG:4326
+        # (which would push every point outside the Europe bbox and drop them all).
+        xs, ys = merged.geometry.x, merged.geometry.y
+        if xs.abs().max() > 180 or ys.abs().max() > 90:
+            LOGGER.warning(
+                "Harbour shapefile has no CRS but coordinates look projected "
+                "(max |x|=%.0f, max |y|=%.0f) — assuming EPSG:3857 (WebMercator)",
+                float(xs.abs().max()), float(ys.abs().max()),
+            )
+            merged = merged.set_crs("EPSG:3857")
+        else:
+            LOGGER.warning("Harbour shapefile has no CRS — assuming EPSG:4326")
+            merged = merged.set_crs(GEOGRAPHIC_CRS)
 
     # Normalise name column (different shapefiles use different column names)
     name_candidates = ["NAME", "Name", "name", "harbour", "PORT_NAME", "PORTNAME", "HARBOR"]

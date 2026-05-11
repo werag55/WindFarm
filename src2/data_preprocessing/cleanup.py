@@ -20,6 +20,7 @@ def prepare_cleaned_dataset(csv_path: str) -> pd.DataFrame:
     LOGGER.info("Loaded raw dataset: %d rows, %d columns", len(df), df.shape[1])
 
     df = _replace_commas_with_periods(df)
+    df = _drop_combined_budget_rows(df)
     df = parse_budget_to_eur(df)
     df = _fill_default_values(df)
     df = _filter_incomplete_rows(df)
@@ -90,6 +91,26 @@ def _replace_commas_with_periods(df: pd.DataFrame) -> pd.DataFrame:
     # Re-introduce NaN after astype(str) turned them into 'nan' strings
     df = df.replace(list(config.MISSING_VALUE_TOKENS), np.nan)
     return df
+
+
+def _drop_combined_budget_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Drop rows whose budget is reported as combined across phases / projects.
+
+    These rows aggregate two or more projects into a single figure (e.g.
+    "EUR 1.4 billion (combined A+B)") and cannot be used as a per-project target.
+    Every such row in the dataset contains the literal substring "combined".
+    """
+    if "total_project_budget" not in df.columns:
+        return df
+    mask = (
+        df["total_project_budget"]
+        .astype(str)
+        .str.contains("combined", case=False, na=False)
+    )
+    n = int(mask.sum())
+    if n:
+        LOGGER.info("_drop_combined_budget_rows: dropped %d combined-budget rows", n)
+    return df.loc[~mask].copy()
 
 
 def _fill_default_values(df: pd.DataFrame) -> pd.DataFrame:

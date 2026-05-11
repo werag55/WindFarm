@@ -37,7 +37,8 @@ MANDATORY_COLUMNS = {
     "LAT",
     "LON",
     "installed_capacity_MW",
-    "total_project_budget"
+    "total_project_budget",
+    "total_project_budget_eur",
 }
 
 NUMERIC_COLUMNS = [
@@ -254,9 +255,6 @@ RANGE_COLUMNS = {
 
 DEFAULT_VALUES = {
     "project_lifetime_years": 25,
-    "mean_wind_speed_mps": None,
-    "mean_wave_height_m": None,
-    "distance_from_port_km": None,
 }
 
 SUPPORTED_CURRENCIES = {"EUR", "GBP", "USD", "NOK", "DKK", "SEK", "PLN"}
@@ -269,12 +267,6 @@ CURRENCY_TO_EUR_IN_YEAR = {
         "GBP": 1.49
     },
 }
-
-BUDGET_SCALES = {
-	"million": 1e6,
-	"billion": 1e9,
-}
-DEFAULT_BUDGET_SCALE = "billion"
 
 GWA_TARGET_ROUGHNESS_M = 0.03
 GWA_COORDINATE_ROUND_DECIMALS = 4
