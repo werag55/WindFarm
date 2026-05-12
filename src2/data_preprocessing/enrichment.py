@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import lru_cache
 import logging
 import math
+import os
 
 import numpy as np
 import pandas as pd
@@ -124,13 +125,17 @@ def _get_mean_wind_speed_from_gwa(latitude: float, longitude: float) -> float:
 
 
 def _get_distance_from_port(lat: float, lon: float, ports_gdf) -> float:
-    """Calculate distance in km from nearest port using preloaded GeoDataFrame."""
-    farm_point = Point(lon, lat)
-    distances = ports_gdf.geometry.distance(farm_point)
-    # distance() returns degrees if CRS is EPSG:4326, convert to km
-    min_dist_deg = distances.min()
-    # rough conversion: 1 degree = 111 km
-    return min_dist_deg * 111.0
+    """Calculate distance in km from nearest port using projected geometries."""
+    projected_ports_gdf = ports_gdf
+    if projected_ports_gdf.crs is None or projected_ports_gdf.crs.is_geographic:
+        projected_ports_gdf = projected_ports_gdf.to_crs("EPSG:3035")
+
+    farm_point = (
+        gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326")
+        .to_crs(projected_ports_gdf.crs)
+        .iloc[0]
+    )
+    return projected_ports_gdf.geometry.distance(farm_point).min() / 1000.0
 
 
 def add_distance_from_port(df: pd.DataFrame) -> pd.DataFrame:
@@ -155,9 +160,9 @@ def add_distance_from_port(df: pd.DataFrame) -> pd.DataFrame:
         ports_gdf = pd.concat(gdfs, ignore_index=True)
         ports_gdf = gpd.GeoDataFrame(ports_gdf, geometry="geometry")
         if ports_gdf.crs is None:
-            ports_gdf = ports_gdf.set_crs("EPSG:4326")
+            ports_gdf = ports_gdf.set_crs("EPSG:3857")
         else:
-            ports_gdf = ports_gdf.to_crs("EPSG:4326")
+            ports_gdf = ports_gdf.to_crs("EPSG:3857")
 
         LOGGER.info(f"Loaded {len(ports_gdf)} ports from shapefiles")
 

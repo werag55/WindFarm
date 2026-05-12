@@ -5,7 +5,7 @@ import pandas as pd
 import logging
 
 from .. import config
-from .parsing import parse_budget_to_eur, to_float_range_mean
+from .parsing import parse_budget_to_eur, parse_turbine_model_columns, to_float_range_mean
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ def prepare_cleaned_dataset(csv_path: str) -> pd.DataFrame:
     df = _load_raw_dataset(csv_path)
     df = _replace_commas_with_periods(df)
     df = parse_budget_to_eur(df)
+    df = parse_turbine_model_columns(df)
     df = _fill_default_values(df)
     df = _filter_incomplete_rows(df)
     df = _convert_range_columns(df)
@@ -51,7 +52,7 @@ def _replace_commas_with_periods(df: pd.DataFrame) -> pd.DataFrame:
     """Replace commas with periods in all cells"""
     for column in df.columns:
         df[column] = df[column].astype(str).str.replace(',', '.')
-    return df
+    return df.replace(list(config.MISSING_VALUE_TOKENS), np.nan)
 
 
 def _fill_default_values(df: pd.DataFrame) -> pd.DataFrame:
