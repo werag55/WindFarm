@@ -48,6 +48,9 @@ def build_calculated_dataset(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def budget_eur_from_unit_capex(unit_capex_eur_per_mw: float, capacity_mw: float) -> float:
+    """Calculate total project budget from unit CAPEX."""
+    return unit_capex_eur_per_mw * capacity_mw
 
 def _unit_capex_eur_per_mw(budget_eur: float, capacity_mw: float) -> float:
     """Calculate EUR/MW CAPEX."""

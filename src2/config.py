@@ -193,7 +193,7 @@ FEATURE_COLUMNS = [
     "mean_wave_height_m",
 ]
 
-TARGET_COLUMN = "total_project_budget_eur_indexed"
+TARGET_COLUMN = "unit_capex_eur_per_mw_indexed" #"total_project_budget_eur_indexed"
 
 DEFAULT_NEW_SAMPLE = {
     "LAT": 56.0,

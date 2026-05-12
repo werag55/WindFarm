@@ -147,6 +147,9 @@ def add_distance_from_port(df: pd.DataFrame) -> pd.DataFrame:
     ]
 
     try:
+        # Enable GDAL to restore/create missing .shx files
+        os.environ['SHAPE_RESTORE_SHX'] = 'YES'
+        
         gdfs = []
         for path in PORTS_SHP_PATHS:
             if path.exists():
