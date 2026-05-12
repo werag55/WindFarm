@@ -37,6 +37,108 @@ def parse_budget_to_eur(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def parse_turbine_model_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Split raw turbine model text into producer and rated power features."""
+    if "turbine_model" not in df.columns:
+        return df
+
+    parsed = df["turbine_model"].apply(_parse_turbine_model).apply(pd.Series)
+
+    if "turbine_producer" not in df.columns:
+        df["turbine_producer"] = np.nan
+    if "turbine_power_MW" not in df.columns:
+        df["turbine_power_MW"] = np.nan
+
+    existing_producer = df["turbine_producer"].replace(list(config.MISSING_VALUE_TOKENS), np.nan)
+    df["turbine_producer"] = parsed["turbine_producer"].fillna(existing_producer)
+    df["turbine_power_MW"] = pd.to_numeric(df["turbine_power_MW"], errors="coerce").fillna(
+        parsed["turbine_power_MW"]
+    )
+    return df
+
+
+def _parse_turbine_model(model: object) -> dict[str, object]:
+    """Infer turbine producer and MW rating from common offshore turbine names."""
+    return {
+        "turbine_producer": _infer_turbine_producer_from_model(model),
+        "turbine_power_MW": _infer_turbine_power_from_model(model),
+    }
+
+
+def _infer_turbine_producer_from_model(model: object) -> str | float:
+    """Infer the turbine producer from common model naming patterns."""
+    if pd.isna(model):
+        return np.nan
+
+    model_text = str(model)
+    if model_text.strip().lower() in config.MISSING_VALUE_TOKENS:
+        return np.nan
+
+    producer_patterns = [
+        ("Siemens Gamesa", r"\bSiemens\s+Gamesa\b"),
+        ("MHI Vestas", r"\bMHI\s+Vestas\b"),
+        ("Vestas", r"\bVestas\b"),
+        ("Siemens", r"\bSiemens\b"),
+        ("GE", r"\bGE\b|\bHaliade\b"),
+        ("Senvion", r"\bSenvion\b|\bREpower\b"),
+        ("Adwen", r"\bAdwen\b"),
+        ("BARD", r"\bBARD\b"),
+        ("AREVA", r"\bAREVA\b"),
+        ("Bonus", r"\bBonus\b"),
+        ("MingYang", r"\bMingYang\b|\bMySE\b"),
+        ("Wind World", r"\bWind\s+World\b"),
+        ("Enron Wind", r"\bEnron\s+Wind\b"),
+        ("Alstom", r"\bAlstom\b"),
+    ]
+    producers = []
+    for producer, pattern in producer_patterns:
+        if re.search(pattern, model_text, flags=re.IGNORECASE):
+            producers.append(producer)
+            model_text = re.sub(pattern, "", model_text, flags=re.IGNORECASE)
+    if not producers:
+        return np.nan
+    if len(producers) == 1:
+        return producers[0]
+    return "Multiple"
+
+
+def _infer_turbine_power_from_model(model: object) -> float:
+    """Infer MW rating from common offshore turbine model naming patterns."""
+    if pd.isna(model):
+        return np.nan
+
+    model_text = str(model)
+    if model_text.strip().lower() in config.MISSING_VALUE_TOKENS:
+        return np.nan
+
+    values = [float(value) for value in re.findall(r"(\d+(?:\.\d+)?)\s*MW\b", model_text, flags=re.IGNORECASE)]
+    values.extend(
+        float(value) / 1000.0
+        for value in re.findall(r"(\d+(?:\.\d+)?)\s*kW\b", model_text, flags=re.IGNORECASE)
+    )
+    values.extend(float(value) for value in re.findall(r"\bSWT-(\d+(?:\.\d+)?)", model_text, flags=re.IGNORECASE))
+    values.extend(float(value) for value in re.findall(r"\bSWP-(\d+(?:\.\d+)?)", model_text, flags=re.IGNORECASE))
+    values.extend(float(value) for value in re.findall(r"\bSG\s*(\d+(?:\.\d+)?)", model_text, flags=re.IGNORECASE))
+    values.extend(float(value) for value in re.findall(r"\bV\d+-(\d+(?:\.\d+)?)", model_text, flags=re.IGNORECASE))
+    values.extend(float(value) for value in re.findall(r"\bAD\s*(\d+(?:\.\d+)?)-", model_text, flags=re.IGNORECASE))
+    values.extend(float(value) for value in re.findall(r"\bMySE\s*(\d+(?:\.\d+)?)-", model_text, flags=re.IGNORECASE))
+
+    for pattern in [
+        r"\bREpower\s+(\d+(?:\.\d+)?)M\b",
+        r"\bSenvion\s+(\d+(?:\.\d+)?)M\d+\b",
+        r"\bBARD\s+(\d+(?:\.\d+)?)\b",
+        r"\bAREVA\s+M(\d{4})\b",
+    ]:
+        for match in re.finditer(pattern, model_text, flags=re.IGNORECASE):
+            value = float(match.group(1))
+            values.append(value / 1000.0 if value >= 100 else value)
+
+    plausible_values = [value for value in values if 0.1 <= value <= 20.0]
+    if not plausible_values:
+        return np.nan
+    return float(np.mean(plausible_values))
+
+
 def _get_currency_rate(currency: str, year: int) -> float:
     """Get currency rate for a given year."""
     if currency == "EUR":

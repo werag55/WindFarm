@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import re
-
 import numpy as np
 import pandas as pd
 import dash_bootstrap_components as dbc
@@ -35,7 +33,6 @@ DEFAULT_CLUSTERING_METRICS = [
 def prepare_clustering_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """Fill clustering-only metrics that can be recovered from local project data."""
     clustering_df = df.copy()
-    clustering_df = _add_turbine_power_from_raw_data(clustering_df)
 
     if (
         "distance_from_port_km" in clustering_df.columns
@@ -287,57 +284,3 @@ def _scaling_explanation(scaling: str) -> str:
     if scaling == "percent":
         return "Percentage difference compares relative deviation from the proposed farm values."
     return "Z-score scaling gives each selected metric equal statistical weight using the historical fleet distribution."
-
-
-def _add_turbine_power_from_raw_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Infer historical turbine power from raw turbine model text when possible."""
-    if "wind_farm_name" not in df.columns:
-        return df
-
-    try:
-        raw_df = pd.read_csv(config.RAW_DATASET_PATH, sep=config.CSV_SEPARATOR)
-    except Exception:
-        return df
-
-    if "wind_farm_name" not in raw_df.columns or "turbine_model" not in raw_df.columns:
-        return df
-
-    raw_df["inferred_turbine_power_MW"] = raw_df["turbine_model"].map(
-        _infer_turbine_power_from_model
-    )
-    power_by_farm = (
-        raw_df.dropna(subset=["inferred_turbine_power_MW"])
-        .drop_duplicates(subset=["wind_farm_name"])
-        .set_index("wind_farm_name")["inferred_turbine_power_MW"]
-    )
-    if power_by_farm.empty:
-        return df
-
-    if "turbine_power_MW" not in df.columns:
-        df["turbine_power_MW"] = np.nan
-
-    inferred_power = df["wind_farm_name"].map(power_by_farm)
-    df["turbine_power_MW"] = pd.to_numeric(
-        df["turbine_power_MW"],
-        errors="coerce",
-    ).fillna(inferred_power)
-    return df
-def _infer_turbine_power_from_model(model: object) -> float:
-    """Infer MW rating from common offshore turbine model naming patterns."""
-    if pd.isna(model):
-        return np.nan
-
-    model_text = str(model)
-    values = [float(value) for value in re.findall(r"(\d+(?:\.\d+)?)\s*MW\b", model_text)]
-    values.extend(float(value) for value in re.findall(r"\bSWT-(\d+(?:\.\d+)?)", model_text))
-    values.extend(float(value) for value in re.findall(r"\bSG\s*(\d+(?:\.\d+)?)", model_text))
-    values.extend(float(value) for value in re.findall(r"\bV\d+-(\d+(?:\.\d+)?)", model_text))
-
-    repower_match = re.search(r"\bREpower\s+(\d+(?:\.\d+)?)M\b", model_text)
-    if repower_match:
-        values.append(float(repower_match.group(1)))
-
-    plausible_values = [value for value in values if 1.0 <= value <= 20.0]
-    if not plausible_values:
-        return np.nan
-    return float(np.mean(plausible_values))
