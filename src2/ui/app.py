@@ -88,6 +88,8 @@ def create_app(df: pd.DataFrame, model):
 
         # Enrich with environmental data
         new_sample = add_environmental_columns(new_sample)
+        new_sample = add_water_depth(new_sample)
+        new_sample = add_distance_from_shore(new_sample)
         new_sample = add_distance_from_port(new_sample)
         new_sample = add_distance_from_construction_port(new_sample)
 
@@ -106,11 +108,11 @@ def create_app(df: pd.DataFrame, model):
         # Predict and calculate profitability
         prediction = model.predict(new_sample_features)[0]
         new_sample[config.TARGET_COLUMN] = prediction
-        
+
         if (config.TARGET_COLUMN == "unit_capex_eur_per_mw_indexed"
             or config.TARGET_COLUMN == "unit_capex_eur_per_mw"):
             new_sample["total_project_budget_eur_indexed"] = budget_eur_from_unit_capex(prediction, new_sample["installed_capacity_MW"].iloc[0])
-        
+
         new_sample["total_project_budget_eur"] = new_sample["total_project_budget_eur_indexed"]
         new_sample_calculated = calculate(new_sample)
         clustering_table = create_closest_farms_table(
