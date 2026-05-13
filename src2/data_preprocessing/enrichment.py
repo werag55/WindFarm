@@ -5,6 +5,7 @@ from functools import lru_cache
 import logging
 import math
 import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,11 @@ from pathlib import Path
 from .. import config
 
 LOGGER = logging.getLogger(__name__)
+
+OPEN_TOPO_DATA_URL = "https://api.opentopodata.org/v1/gebco2020"
+COASTLINE_GEOJSON_PATH = (
+    Path(__file__).parent.parent.parent / "data" / "ne_110m_coastline.geojson"
+)
 
 CONSTRUCTION_PORTS = [
     {"name": "Esbjerg",             "lon":  8.4469, "lat": 55.4633},
@@ -52,9 +58,10 @@ CONSTRUCTION_PORTS = [
 ]
 
 _CONSTRUCTION_PORTS_GDF: gpd.GeoDataFrame | None = None
+_COASTLINE_GDF: gpd.GeoDataFrame | None = None
+
 
 def _get_construction_ports_gdf() -> gpd.GeoDataFrame:
-    """Return a GeoDataFrame of construction ports."""
     global _CONSTRUCTION_PORTS_GDF
     if _CONSTRUCTION_PORTS_GDF is None:
         ports_df = pd.DataFrame(CONSTRUCTION_PORTS)
@@ -66,8 +73,22 @@ def _get_construction_ports_gdf() -> gpd.GeoDataFrame:
     return _CONSTRUCTION_PORTS_GDF
 
 
+def _get_coastline_gdf() -> gpd.GeoDataFrame:
+    global _COASTLINE_GDF
+    if _COASTLINE_GDF is None:
+        if not COASTLINE_GEOJSON_PATH.exists():
+            raise FileNotFoundError(
+                f"Coastline file not found at {COASTLINE_GEOJSON_PATH}; "
+                "place ne_110m_coastline.geojson under data/."
+            )
+        gdf = gpd.read_file(COASTLINE_GEOJSON_PATH)
+        if gdf.crs is None:
+            gdf = gdf.set_crs("EPSG:4326")
+        _COASTLINE_GDF = gdf.to_crs("EPSG:3035")
+    return _COASTLINE_GDF
+
+
 def add_distance_from_construction_port(df: pd.DataFrame) -> pd.DataFrame:
-    """Add distance_from_construction_port_km column"""
     ports_gdf = _get_construction_ports_gdf()
     df["distance_from_construction_port_km"] = df.apply(
         lambda row: _get_distance_from_port(row["LAT"], row["LON"], ports_gdf)
@@ -76,6 +97,134 @@ def add_distance_from_construction_port(df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     )
     return df
+
+def add_water_depth(df: pd.DataFrame) -> pd.DataFrame:
+    for col in ("water_depth_min_m", "water_depth_max_m", "water_depth_mean_m"):
+        if col not in df.columns:
+            df[col] = np.nan
+
+    def _fill_row(row: pd.Series) -> pd.Series:
+        current = {
+            "water_depth_min_m": row["water_depth_min_m"],
+            "water_depth_max_m": row["water_depth_max_m"],
+            "water_depth_mean_m": row["water_depth_mean_m"],
+        }
+        if pd.notna(current["water_depth_mean_m"]):
+            return pd.Series(current)
+        if pd.isna(row.get("LAT")) or pd.isna(row.get("LON")):
+            return pd.Series(current)
+        depth = _get_water_depth_m(row["LAT"], row["LON"])
+        if pd.isna(depth):
+            return pd.Series(current)
+        return pd.Series({
+            "water_depth_min_m": current["water_depth_min_m"]
+                if pd.notna(current["water_depth_min_m"]) else depth,
+            "water_depth_max_m": current["water_depth_max_m"]
+                if pd.notna(current["water_depth_max_m"]) else depth,
+            "water_depth_mean_m": depth,
+        })
+
+    filled = df.apply(_fill_row, axis=1)
+    df[["water_depth_min_m", "water_depth_max_m", "water_depth_mean_m"]] = filled
+    return df
+
+
+def add_distance_from_shore(df: pd.DataFrame) -> pd.DataFrame:
+    for col in (
+        "distance_from_shore_min_km",
+        "distance_from_shore_max_km",
+        "distance_from_shore_mean_km",
+    ):
+        if col not in df.columns:
+            df[col] = np.nan
+
+    def _fill_row(row: pd.Series) -> pd.Series:
+        current = {
+            "distance_from_shore_min_km": row["distance_from_shore_min_km"],
+            "distance_from_shore_max_km": row["distance_from_shore_max_km"],
+            "distance_from_shore_mean_km": row["distance_from_shore_mean_km"],
+        }
+        if pd.notna(current["distance_from_shore_mean_km"]):
+            return pd.Series(current)
+        if pd.isna(row.get("LAT")) or pd.isna(row.get("LON")):
+            return pd.Series(current)
+        distance_km = _get_distance_from_shore_km(row["LAT"], row["LON"])
+        if pd.isna(distance_km):
+            return pd.Series(current)
+        return pd.Series({
+            "distance_from_shore_min_km": current["distance_from_shore_min_km"]
+                if pd.notna(current["distance_from_shore_min_km"]) else distance_km,
+            "distance_from_shore_max_km": current["distance_from_shore_max_km"]
+                if pd.notna(current["distance_from_shore_max_km"]) else distance_km,
+            "distance_from_shore_mean_km": distance_km,
+        })
+
+    filled = df.apply(_fill_row, axis=1)
+    df[[
+        "distance_from_shore_min_km",
+        "distance_from_shore_max_km",
+        "distance_from_shore_mean_km",
+    ]] = filled
+    return df
+
+
+@lru_cache(maxsize=2048)
+def _get_distance_from_shore_km(latitude: float, longitude: float) -> float:
+    lat = round(float(latitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    lon = round(float(longitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    try:
+        coastline_gdf = _get_coastline_gdf()
+    except FileNotFoundError as exc:
+        LOGGER.warning("%s", exc)
+        return np.nan
+    point = (
+        gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326")
+        .to_crs(coastline_gdf.crs)
+        .iloc[0]
+    )
+    distance_km = float(coastline_gdf.geometry.distance(point).min()) / 1000.0
+    LOGGER.debug("Coastline distance lat=%.4f lon=%.4f -> %.1f km", lat, lon, distance_km)
+    return distance_km
+
+
+@lru_cache(maxsize=2048)
+def _get_water_depth_m(latitude: float, longitude: float) -> float:
+    lat = round(float(latitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    lon = round(float(longitude), config.GWA_COORDINATE_ROUND_DECIMALS)
+    params = {"locations": f"{lat},{lon}"}
+    LOGGER.debug("GEBCO request lat=%.4f lon=%.4f", lat, lon)
+    try:
+        try:
+            response = requests.get(OPEN_TOPO_DATA_URL, params=params, timeout=30)
+            if response.status_code == 429:
+                LOGGER.debug("GEBCO 429, retrying after backoff")
+                time.sleep(2.0)
+                response = requests.get(OPEN_TOPO_DATA_URL, params=params, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            elevation = None
+            if data.get("status") == "OK":
+                results = data.get("results") or []
+                if results:
+                    elevation = results[0].get("elevation")
+            if elevation is None:
+                LOGGER.warning("GEBCO returned no elevation lat=%.4f lon=%.4f", lat, lon)
+                return np.nan
+            if float(elevation) >= 0:
+                LOGGER.warning(
+                    "Location appears on land (elevation=%.1f m) lat=%.4f lon=%.4f",
+                    float(elevation), lat, lon,
+                )
+                return np.nan
+            depth = -float(elevation)
+            LOGGER.debug("GEBCO result lat=%.4f lon=%.4f depth=%.1f m", lat, lon, depth)
+            return depth
+        except Exception as exc:
+            LOGGER.warning("GEBCO request failed lat=%.4f lon=%.4f: %s", lat, lon, exc)
+            return np.nan
+    finally:
+        time.sleep(1.0)
+
 
 def add_environmental_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Attach mean wind speed and wave data, using GWA."""

@@ -11,7 +11,13 @@ from waitress import serve
 
 from .. import config
 from ..calculations.calculations import calculate
-from ..data_preprocessing.enrichment import add_environmental_columns, add_distance_from_port, add_distance_from_construction_port
+from ..data_preprocessing.enrichment import (
+    add_distance_from_construction_port,
+    add_distance_from_port,
+    add_distance_from_shore,
+    add_environmental_columns,
+    add_water_depth,
+)
 from .components import create_input_form
 from .clustering import create_closest_farms_table, create_clustering_panel, prepare_clustering_dataframe
 from .profitability_map import profitability_map
@@ -87,6 +93,8 @@ def create_app(df: pd.DataFrame, model):
 
         # Enrich with environmental data
         new_sample = add_environmental_columns(new_sample)
+        new_sample = add_water_depth(new_sample)
+        new_sample = add_distance_from_shore(new_sample)
         new_sample = add_distance_from_port(new_sample)
         new_sample = add_distance_from_construction_port(new_sample)
 
