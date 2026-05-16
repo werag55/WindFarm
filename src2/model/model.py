@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split, KFold, cross_validate
 from sklearn.linear_model import LinearRegression, Ridge, LassoCV, ElasticNetCV
+from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, median_absolute_error
 from sklearn.preprocessing import StandardScaler
@@ -35,6 +36,8 @@ def train_model(df: pd.DataFrame):
     # Drop rows with missing target values and remove outliers
     df = df.dropna(subset=[config.TARGET_COLUMN])
     df = remove_outliers_iqr(df, config.TARGET_COLUMN)
+    imputer = SimpleImputer(missing_values=np.nan, strategy='median')
+    df[feature_columns] = imputer.fit_transform(df[feature_columns])
     df = df.fillna(0)
 
     X = df[feature_columns]
@@ -50,17 +53,17 @@ def train_model(df: pd.DataFrame):
         #"LinearRegression": TransformedTargetRegressor(regressor=LinearRegression(), transformer=StandardScaler()),
         "Ridge": TransformedTargetRegressor(regressor=Ridge(), transformer=StandardScaler()),
         "Lasso": TransformedTargetRegressor(
-        regressor=LassoCV(alphas=np.logspace(-3, 3, 10), max_iter=10000, random_state=42), 
-        transformer=StandardScaler(),
+            regressor=LassoCV(alphas=np.logspace(-3, 3, 10), max_iter=50000, random_state=42),
+            transformer=StandardScaler(),
         ),
         "ElasticNet": TransformedTargetRegressor(
-        regressor=ElasticNetCV(
-        l1_ratio=[.1, .5, .7, .9, .95, .99, 1],
-        alphas=np.logspace(-3, 3, 10),
-        max_iter=10000,
-        random_state=42
-        ),
-        transformer=StandardScaler()
+                regressor=ElasticNetCV(
+                l1_ratio=[.1, .5, .7, .9, .95, .99, 1],
+                alphas=np.logspace(-3, 3, 10),
+                max_iter=50000,
+                random_state=42
+            ),
+            transformer=StandardScaler()
         ),
         "RandomForest": RandomForestRegressor(random_state=42),
         "GradientBoosting": GradientBoostingRegressor(random_state=42)

@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 from waitress import serve
 
 from .. import config
-from ..calculations.calculations import calculate
+from ..calculations.calculations import budget_eur_from_unit_capex, calculate
 from ..data_preprocessing.enrichment import add_environmental_columns, add_distance_from_port, add_distance_from_construction_port
 from .components import create_input_form
 from .clustering import create_closest_farms_table, create_clustering_panel, prepare_clustering_dataframe
@@ -30,10 +30,11 @@ def create_app(df: pd.DataFrame, model):
                 dcc.Dropdown(
                     id='color-column-dropdown',
                     options=[
-                        {'label': 'LCOE (Indexed)', 'value': 'lcoe_eur_per_mwh_indexed'},
-                        {'label': 'Annual CAPEX (Indexed)', 'value': 'annual_capex_eur_per_mwh_indexed'},
-                        {'label': 'Annual OPEX', 'value': 'annual_opex_eur_per_mwh'},
-                        {'label': 'Total Project Budget (EUR, Indexed)', 'value': 'total_project_budget_eur_indexed'},
+                        {'label': 'LCOE (Indexed) [EUR/MWh]', 'value': 'lcoe_eur_per_mwh_indexed'},
+                        {'label': 'Unit CAPEX (Indexed) [EUR/MW]', 'value': 'unit_capex_eur_per_mw_indexed'},
+                        {'label': 'Annual OPEX [EUR]', 'value': 'annual_opex_eur'},
+                        {'label': 'Annual OPEX [EUR/MWh]', 'value': 'annual_opex_eur_per_mwh'},
+                        {'label': 'Total Project Budget (Indexed) [EUR]', 'value': 'total_project_budget_eur_indexed'},
                     ],
                     value=config.TARGET_PROFITABILITY_COLUMN,
                     className="mb-3"
@@ -104,8 +105,13 @@ def create_app(df: pd.DataFrame, model):
 
         # Predict and calculate profitability
         prediction = model.predict(new_sample_features)[0]
-        new_sample["total_project_budget_eur_indexed"] = prediction
-        new_sample["total_project_budget_eur"] = prediction
+        new_sample[config.TARGET_COLUMN] = prediction
+        
+        if (config.TARGET_COLUMN == "unit_capex_eur_per_mw_indexed"
+            or config.TARGET_COLUMN == "unit_capex_eur_per_mw"):
+            new_sample["total_project_budget_eur_indexed"] = budget_eur_from_unit_capex(prediction, new_sample["installed_capacity_MW"].iloc[0])
+        
+        new_sample["total_project_budget_eur"] = new_sample["total_project_budget_eur_indexed"]
         new_sample_calculated = calculate(new_sample)
         clustering_table = create_closest_farms_table(
             clustering_df,
@@ -121,16 +127,16 @@ def create_app(df: pd.DataFrame, model):
             html.H4("Prediction Results", className="mt-4"),
             dbc.Row([
                 dbc.Col(dbc.Card([
-                    dbc.CardHeader("Predicted Total Project Budget (Indexed)"),
+                    dbc.CardHeader("Total Project Budget (Indexed)"),
                     dbc.CardBody(f"{new_sample_calculated['total_project_budget_eur_indexed'].iloc[0]:,.2f} EUR")
                 ]), width=3),
                 dbc.Col(dbc.Card([
-                    dbc.CardHeader("Annual CAPEX (Indexed)"),
-                    dbc.CardBody(f"{new_sample_calculated['annual_capex_eur_per_mwh_indexed'].iloc[0]:,.2f} EUR/MWh")
+                    dbc.CardHeader("Unit CAPEX (Indexed)"),
+                    dbc.CardBody(f"{new_sample_calculated['unit_capex_eur_per_mw_indexed'].iloc[0]:,.2f} EUR/MW")
                 ]), width=3),
                 dbc.Col(dbc.Card([
                     dbc.CardHeader("Annual OPEX"),
-                    dbc.CardBody(f"{new_sample_calculated['annual_opex_eur_per_mwh'].iloc[0]:,.2f} EUR/MWh")
+                    dbc.CardBody(f"{new_sample_calculated['annual_opex_eur'].iloc[0]:,.2f} EUR")
                 ]), width=3),
                 dbc.Col(dbc.Card([
                     dbc.CardHeader("LCOE (Indexed)"),

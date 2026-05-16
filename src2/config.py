@@ -193,13 +193,13 @@ FEATURE_COLUMNS = [
     "mean_wave_height_m",
 ]
 
-TARGET_COLUMN = "total_project_budget_eur_indexed"
+TARGET_COLUMN = "unit_capex_eur_per_mw_indexed" #"total_project_budget_eur_indexed"
 
 DEFAULT_NEW_SAMPLE = {
-    "LAT": 56.0,
-    "LON": 10.0,
+    "LAT": 65.0,
+    "LON": 2.0,
     "area_sqkm": 50.0,
-    "country": "Denmark",
+    "country": "Norway",
     "commissioning_year": CURRENT_YEAR + 2,
     "turbine_power_MW": 10.0,
     "turbine_producer": "Vestas",
@@ -211,7 +211,7 @@ DEFAULT_NEW_SAMPLE = {
     "distance_from_port_km": None, # to be filled based on location
     "distance_from_construction_port_km": None, # to be filled based on location
     "project_lifetime_years": 25,
-    "installed_capacity_MW": 100.0,
+    "installed_capacity_MW": 800.0,
     "mean_wind_speed_mps": None, # to be filled based on location
     "mean_wave_height_m": None, # to be filled based on location
 }
