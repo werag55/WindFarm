@@ -42,22 +42,6 @@ def create_input_form(df):
             dbc.Col(dcc.Dropdown(id='foundation-dropdown', options=[{'label': i, 'value': i} for i in df['foundation_type'].unique()], value=config.DEFAULT_NEW_SAMPLE["foundation_type"]), width=8),
         ], className="mb-2"),
         dbc.Row([
-            dbc.Col(dbc.Label("Water Depth Min (m)"), width=4),
-            dbc.Col(dcc.Input(id='depth-min-input', type='number', value=config.DEFAULT_NEW_SAMPLE["water_depth_min_m"]), width=8),
-        ], className="mb-2"),
-        dbc.Row([
-            dbc.Col(dbc.Label("Water Depth Max (m)"), width=4),
-            dbc.Col(dcc.Input(id='depth-max-input', type='number', value=config.DEFAULT_NEW_SAMPLE["water_depth_max_m"]), width=8),
-        ], className="mb-2"),
-        dbc.Row([
-            dbc.Col(dbc.Label("Distance Shore Min (km)"), width=4),
-            dbc.Col(dcc.Input(id='shore-min-input', type='number', value=config.DEFAULT_NEW_SAMPLE["distance_from_shore_min_km"]), width=8),
-        ], className="mb-2"),
-        dbc.Row([
-            dbc.Col(dbc.Label("Distance Shore Max (km)"), width=4),
-            dbc.Col(dcc.Input(id='shore-max-input', type='number', value=config.DEFAULT_NEW_SAMPLE["distance_from_shore_max_km"]), width=8),
-        ], className="mb-2"),
-        dbc.Row([
             dbc.Col(dbc.Label("Lifetime (years)"), width=4),
             dbc.Col(dcc.Input(id='lifetime-input', type='number', value=config.DEFAULT_NEW_SAMPLE["project_lifetime_years"]), width=8),
         ], className="mb-2"),

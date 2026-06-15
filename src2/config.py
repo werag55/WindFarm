@@ -204,10 +204,6 @@ DEFAULT_NEW_SAMPLE = {
     "turbine_power_MW": 10.0,
     "turbine_producer": "Vestas",
     "foundation_type": "Monopile",
-    "water_depth_min_m": 20.0,
-    "water_depth_max_m": 40.0,
-    "distance_from_shore_min_km": 20.0,
-    "distance_from_shore_max_km": 40.0,
     "distance_from_port_km": None, # to be filled based on location
     "distance_from_construction_port_km": None, # to be filled based on location
     "project_lifetime_years": 25,
