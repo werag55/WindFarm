@@ -2,9 +2,11 @@
 
 import pandas as pd
 import wbgapi as wb
+import logging
 
-from src.data_preparation.cleanup import LOGGER
 from .. import config
+
+LOGGER = logging.getLogger(__name__)
 
 # country names as used in the dataset to ISO3 codes used by World Bank API
 country_map = {
