@@ -1,6 +1,0 @@
-numpy
-pandas
-wind-stats
-plotly
-requests
-forex-python
