@@ -37,3 +37,30 @@ It prevents overwriting the existing data and allows to save time when you want 
 
 The project's configuration is managed in the `src2/config.py` file. This file contains constants for data paths, model parameters, and other settings.
 
+## To-Do
+
+- [x] If possible fetch water depth based on location (add in `enrichment.py`, fill `NaN`s in historical data, fetch based on location for new sample and remove user input for `water_depth_min_m` and `water_depth_max_m`)
+
+- [x] If possible calculate distance from shore based on location (fill `NaN`s in historical data, calculate based on location for new sample and remove user input for `distance_from_shore_min_km` and `distance_from_shore_max_km`)
+
+- [ ] Analyse `foundation_type` column - should we merge some unique values into one category? if so implement is as a part of the preprocessing
+
+- [ ] Check budget parsing
+  - how should we handle cases before 1999 when EUR didn't exist (`parsing.py`)
+  - decide what to do with values like `PLN 30 billion (combined 2+3)` (drop rows? split cost? ??)
+  - 
+- [ ] Implement better prediction models, evaluate and visualise results.
+
+- [ ] Wykorzystanie danych o projektach z okresu starszego niż 5 lat. Przykładowe wykorzystanie danych: (1)
+      porównanie oszacowania opłacalności projektów na podstawie pełnego zestawu danych z
+      oszacowaniem wykonanym tylko na danych z ostatnich 5 lat. Wymagane przedstawienie oceny
+      niepewności algorytmu; (2) porównanie oszacowania opłacalności projektów przy różnych indeksacjach
+      kosztów i parametrów starszych projektów.
+
+- [ ] Enhence logging.
+
+- [ ] Prettify UI.
+
+- [ ] Sensitivity analysis?
+
+- [ ] Review what was already done in case there are any errors :)
