@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, mean_absolute_percentage_error, median_absolute_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import TransformedTargetRegressor
+from sklearn.inspection import partial_dependence
 import logging
 
 from .. import config
@@ -73,6 +74,7 @@ def train_model(df: pd.DataFrame):
     best_r2 = -float("inf")
     best_model_name = None
     best_model = None
+    linear_models_data = {}  # Track best Lasso, Ridge, ElasticNet
 
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
@@ -96,6 +98,14 @@ def train_model(df: pd.DataFrame):
         
         results[name] = {"model": model, "metrics": metrics, "y_pred": y_pred}
         
+        # Track best linear models for coefficient extraction
+        if name in ["Lasso", "Ridge", "ElasticNet"]:
+            linear_models_data[name] = {
+                "model": model,
+                "r2": r2,
+                "metrics": metrics
+            }
+        
         if r2 > best_r2:
             best_r2 = r2
             best_model_name = name
@@ -115,8 +125,41 @@ def train_model(df: pd.DataFrame):
         
     feature_importance = pd.DataFrame({'feature': X.columns, 'importance': np.abs(importances)})
 
+    # Extract coefficients from best Lasso, Ridge, ElasticNet
+    linear_coefs = {}
+    for model_name in ["Lasso", "Ridge", "ElasticNet"]:
+        if model_name in linear_models_data:
+            model = linear_models_data[model_name]["model"]
+            if hasattr(model, 'coef_'):
+                coefs = model.coef_
+            elif hasattr(model, 'regressor_') and hasattr(model.regressor_, 'coef_'):
+                coefs = model.regressor_.coef_
+            else:
+                coefs = np.zeros(len(X.columns))
+            
+            linear_coefs[model_name] = pd.DataFrame({
+                'feature': X.columns,
+                'coefficient': coefs
+            }).sort_values(by='coefficient', key=abs, ascending=False)
+
+    # Generate partial dependence plots data for best model
+    pdp_data = {}
+    try:
+        # Get top 8 features for PDP (by absolute importance)
+        top_features = feature_importance.nlargest(8, 'importance')['feature'].tolist()
+        feature_indices = [list(X.columns).index(feat) for feat in top_features]
+        
+        for feat_idx, feat_name in zip(feature_indices, top_features):
+            pd_result = partial_dependence(best_model, X_test, feat_idx, grid_resolution=20)
+            pdp_data[feat_name] = {
+                'values': pd_result['grid_values'][0],
+                'pd': pd_result['average'][0]
+            }
+    except Exception as e:
+        LOGGER.warning("Could not generate PDP: %s", str(e))
+
     # Package results for dashboard
     comparison_metrics = {name: res["metrics"] for name, res in results.items()}
     best_y_data = {"y_test": y_test, "y_pred": results[best_model_name]["y_pred"]}
 
-    return best_model, comparison_metrics, feature_importance, best_y_data
+    return best_model, comparison_metrics, feature_importance, best_y_data, linear_coefs, pdp_data, X_train, X_test
